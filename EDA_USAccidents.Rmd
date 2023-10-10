@@ -30,3 +30,6 @@ knitr::opts_chunk$set(warning = F, message = F)
 options(scientific=T, digits = 3) 
 # options(scipen=9, digits = 3) 
 ```
+
+data = read.csv("US_Accidents_Updated.csv")
+
