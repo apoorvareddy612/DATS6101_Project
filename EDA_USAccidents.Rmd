@@ -1,9 +1,9 @@
 ---
 title: "USAccidents_Analysis"
-author: "Team: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Deversh Apurva Sheth"
+author: "Team: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Devarsh Apurva Sheth"
 output:
   html_document:
-    code_folding: hide
+    code_folding: show
     number_sections: false
     toc: yes
     toc_depth: 3
