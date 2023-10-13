@@ -1,5 +1,5 @@
 ---
-title: "USAccidents_Analysis"
+title: "US_Accidents_Analysis"
 author: "Team: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Devarsh Apurva Sheth"
 output:
   html_document:
@@ -21,6 +21,7 @@ output:
 # Then load the package in your R session.
 library(ezids)
 library(ggplot2)
+library(dplyr)
 ```
 ```{r setup, include=FALSE}
 # Some of common RMD options (and the defaults) are: 
@@ -31,5 +32,32 @@ options(scientific=T, digits = 3)
 # options(scipen=9, digits = 3) 
 ```
 
-data = read.csv("US_Accidents_Updated.csv")
 
+```{r}
+data = read.csv("US_Accidents_updated1.csv")
+str(data)
+```
+
+```{r}
+xkablesummary(data)
+```
+
+```{r}
+ggplot(data, aes(x = SeverityProportion)) +
+  geom_histogram(binwidth = 0.001, fill = "blue", color = "black") +
+  labs(title = "Distribution of Severity Proportion",
+       x = "Severity Proportion",
+       y = "Frequency")
+```
+
+```{r}
+ggplot(data, aes(x = factor(Amenity))) +
+  geom_bar(fill = "green") +
+  labs(title = "Cities with Nearby Amenities (1) vs. Without Amenities (0)",
+       x = "Amenity",
+       y = "Frequency")
+```
+
+```{r}
+table(data$Amenity)
+```
