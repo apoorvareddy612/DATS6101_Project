@@ -1,0 +1,203 @@
+﻿City,Street,Sum of SeverityProportion,Response time
+Atlanta,GA-401 N,0.000264531,12
+Atlanta,GA-401 S,0.000354307,12
+Atlanta,GA-402 E,0.000344891,12
+Atlanta,GA-402 W,0.000323426,12
+Atlanta,GA-403 N,0.000430865,12
+Atlanta,GA-403 S,0.000392673,12
+Atlanta,GA-407 E,0.000231487,12
+Atlanta,GA-407 S,0.000348926,12
+Atlanta,GA-407 W,0.000407704,12
+Atlanta,I-285 E,0.000223942,12
+Atlanta,I-75 N,0.000373256,12
+Atlanta,I-75 S,0.000451919,12
+Austin,I-35 N,0.000265818,5
+Austin,I-35 S,0.000274474,5
+Austin,N Interstate 35,0.000224702,5
+Austin,S Interstate 35,0.000126856,5
+Baton Rouge,I-10 E,0.000116972,10
+Baton Rouge,I-10 W,0.000214116,10
+Baton Rouge,I-110 S,0.000113579,10
+Baton Rouge,I-12 E,0.000104514,10
+Birmingham,I-59 N,0.000101531,15
+Birmingham,I-65 N,0.000135687,15
+Birmingham,I-65 S,0.000140951,15
+Bronx,Cross Bronx Expy E,0.000127557,9.5
+Bronx,Cross Bronx Expy W,0.00015142,9.5
+Bronx,Major Deegan Expy N,0.000270438,9.5
+Bronx,Major Deegan Expy S,0.000133874,9.5
+Brooklyn,Brooklyn Queens Expy,0.000401446,9.5
+Charlotte,I-77 N,0.000182593,11
+Charlotte,I-77 S,0.000118551,11
+Charlotte,I-85 N,0.000114164,11
+Charlotte,I-85 S,0.000118434,11
+Chicago,Adlai E Stevenson Expy N,0.000115919,8
+Chicago,Chicago-Kansas City Expressway E,0.000113228,8
+Chicago,Chicago-Kansas City Expressway W,0.000138026,8
+Chicago,Dan Ryan Expy N,0.000152999,8
+Chicago,Dan Ryan Expy S,0.000248097,8
+Chicago,I-90 E,0.000428584,8
+Chicago,I-90 W,0.000108667,8
+Chicago,I-94 W,0.000315999,8
+Cincinnati,I-75 N,0.00016493,10
+Cincinnati,I-75 S,0.000135453,10
+Columbia,I-20 E,0.000108784,10
+Columbia,I-20 W,0.000232071,10
+Columbus,Outerbelt N,0.000112819,8
+Columbus,Outerbelt S,0.000104397,8
+Dallas,I-20 E,0.000143466,13
+Dallas,I-20 W,0.000168965,13
+Dallas,I-30 E,0.000194114,13
+Dallas,I-30 W,0.000124399,13
+Dallas,I-35E N,0.000401505,13
+Dallas,I-35E S,0.000241722,13
+Dallas,I-635 E,0.000132938,13
+Dallas,I-635 W,0.000560761,13
+Dallas,LBJ Express,0.000238213,13
+Dallas,LBJ Fwy E,0.000353196,13
+Dallas,Stemmons Fwy N,0.000166684,13
+Dallas,Tom Landry Fwy,0.000164111,13
+Dallas,US-67 S,0.000160485,13
+Dallas,US-75 S,0.000129195,13
+Dallas,US-77 N,0.000157853,13
+Dallas,US-77 S,0.000177153,13
+Denver,I-25 N,0.00040595,9
+Denver,I-25 S,0.000292078,9
+Denver,I-70 E,0.000143115,9
+Denver,I-70 W,0.00018154,9
+Denver,US-87 N,0.000138845,9
+Denver,US-87 S,0.000146799,9
+Detroit,Chrysler Expy S,0.00019429,10
+Detroit,Edsel Ford Fwy E,0.00030512,10
+Detroit,Edsel Ford Fwy W,0.000138728,10
+Detroit,Edward J Jeffries Fwy,0.000174054,10
+Detroit,I-94 W,0.000102818,10
+Fort Lauderdale,I-595 E,0.00020125,6
+Fort Lauderdale,I-95 N,0.000353546,6
+Fort Lauderdale,I-95 S,0.000241897,6
+Fort Worth,I-35W N,0.000203063,11
+Fort Worth,I-35W S,0.000131944,11
+Fort Worth,I-820 N,0.000100712,11
+Houston,I-10 E,0.00017382,9
+Houston,I-10 W,0.000304243,9
+Houston,I-45 N,0.000750021,9
+Houston,I-45 S,0.00049362,9
+Houston,I-610 E,0.000268216,9
+Houston,I-610 N,0.000197214,9
+Houston,I-610 S,0.000150133,9
+Houston,I-610 W,0.000260554,9
+Houston,I-69 N,0.00018809,9
+Houston,Katy Tollway,0.000128903,9
+Houston,US-59 N,0.000218093,9
+Houston,US-59 S,0.000213765,9
+Houston,US-90 E,0.000181832,9
+Indianapolis,I-465 N,0.000103754,12
+Indianapolis,I-65 N,0.000155046,12
+Indianapolis,I-65 S,0.000123697,12
+Indianapolis,I-70 E,0.000113872,12
+Indianapolis,I-70 W,0.000112176,12
+Jacksonville,E Beltway N,0.000243769,7.5
+Jacksonville,E Beltway S,0.000150659,7.5
+Jacksonville,I-95 N,0.00031594,7.5
+Jacksonville,I-95 S,0.000318747,7.5
+Jacksonville,W Beltway N,0.000162415,7.5
+Jacksonville,W Beltway S,0.000281843,7.5
+Kansas City,I-435 N,0.000160134,9
+Kansas City,I-435 S,0.000113345,9
+Kansas City,I-70 E,0.000127207,9
+Long Beach,I-405 N,0.000267631,10
+Long Beach,Long Beach Fwy N,0.000100829,10
+Long Beach,San Diego Fwy S,0.000162356,10
+Los Angeles,CA-110 S,0.000103871,18
+Los Angeles,Golden State Fwy N,0.000111415,18
+Los Angeles,Golden State Fwy S,0.000412734,18
+Los Angeles,Harbor Fwy N,0.00036887,18
+Los Angeles,Harbor Fwy S,0.000136213,18
+Los Angeles,I-10 E,0.000545146,18
+Los Angeles,I-10 W,0.000457417,18
+Los Angeles,I-105 E,0.000109953,18
+Los Angeles,I-105 W,0.000108374,18
+Los Angeles,I-110 S,0.000114983,18
+Los Angeles,I-405 N,0.000496018,18
+Los Angeles,I-405 S,0.000135395,18
+Los Angeles,I-5 N,0.000313659,18
+Los Angeles,I-5 S,0.000155163,18
+Los Angeles,San Diego Fwy S,0.000124282,18
+Los Angeles,Santa Ana Fwy S,0.000115685,18
+Louisville,Dr Martin Luther King Jr Expy N,0.000164988,9
+Louisville,Henry Watterson Expy E,0.000111064,9
+Louisville,Henry Watterson Expy W,0.000129429,9
+Louisville,I-64 E,0.00013247,9
+Louisville,I-64 W,0.000117264,9
+Minneapolis,I-35W N,0.000194816,15
+Minneapolis,I-35W S,0.000203706,15
+Minneapolis,I-94 W,0.000152355,15
+Minneapolis,MN-5 E,0.000115451,15
+Minneapolis,US-52 E,0.000111825,15
+Nashville,I-24 E,0.000226983,15
+Nashville,I-24 W,0.000306056,15
+Nashville,I-40 E,0.000214467,15
+Nashville,I-40 W,0.000220842,15
+Nashville,I-65 N,0.000192009,15
+Nashville,I-65 S,0.000130248,15
+Oakland,I-580 E,0.000215228,10
+Oakland,I-580 W,0.000198325,10
+Oakland,I-80 W,0.000223591,10
+Oakland,I-880 N,0.00027038,10
+Oakland,I-880 S,0.000133465,10
+Oakland,Nimitz Fwy S,0.000113696,10
+Orlando,I-4 E,0.000368226,7.4
+Orlando,I-4 W,0.000189552,7.4
+Philadelphia,I-76 E,0.000106853,12.2
+Philadelphia,I-95 N,0.000114808,12.2
+Philadelphia,I-95 S,0.000192067,12.2
+Phoenix,Black Canyon Fwy N,0.000185166,5
+Phoenix,Black Canyon Fwy S,0.000170603,5
+Phoenix,I-10 E,0.000140775,5
+Phoenix,I-10 W,0.000212069,5
+Phoenix,Pearl Harbor Memorial Highway,0.000217742,5
+Raleigh,I-40 W,0.000272134,10
+Raleigh,I-440 E,0.000116972,10
+Raleigh,I-440 N,0.000125569,10
+Raleigh,I-440 W,0.000126446,10
+Richmond,I-64 E,0.000147384,9
+Richmond,I-64 W,0.000190547,9
+Richmond,I-80 W,0.000109427,9
+Richmond,I-95 N,0.0002016,9
+Richmond,I-95 S,0.000142413,9
+Sacramento,I-5 N,0.000156157,15
+Sacramento,I-5 S,0.000120247,15
+Sacramento,I-80 E,0.00020856,15
+Sacramento,I-80 W,0.000130014,15
+Saint Louis,I-270 N,0.000146858,10
+Saint Louis,I-270 S,0.000105742,10
+Saint Louis,I-44 E,0.000113053,10
+Saint Louis,I-44 W,0.000109778,10
+Saint Louis,I-55 N,0.000107204,10
+Saint Louis,I-55 S,0.000103344,10
+Saint Louis,I-70 E,0.000101824,10
+Saint Louis,I-70 W,0.000113755,10
+Saint Paul,I-35E N,0.000215695,7
+Saint Paul,I-35E S,0.000105625,7
+Saint Paul,I-94 W,0.000143056,7
+San Antonio,Connally Loop,0.000122177,7
+San Antonio,I-35 N,0.000134108,7
+San Antonio,I-35 S,0.000102467,7
+San Diego,Escondido Fwy S,0.000175574,9
+San Diego,I-15 N,0.000135336,9
+San Diego,I-5 N,0.000269678,9
+San Diego,I-8 E,0.000174989,9
+San Diego,I-8 W,0.000175808,9
+San Diego,I-805 N,0.000231896,9
+San Diego,I-805 S,0.000196395,9
+San Diego,San Diego Fwy S,0.000100362,9
+San Jose,I-280 S,0.000180429,10
+San Jose,I-680 N,0.000100011,10
+San Jose,I-880 N,0.000116211,10
+San Jose,I-880 S,0.000171071,10
+Seattle,I-5 N,0.000490403,7
+Seattle,I-5 S,0.000444609,7
+Tampa,I-275 N,0.000284884,9
+Tampa,I-275 S,0.000244295,9
+Tampa,I-4 W,0.000124867,9
+Tampa,I-75 S,0.000145103,9
