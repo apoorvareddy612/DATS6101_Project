@@ -1,0 +1,76 @@
+---
+title: "EDA"
+author: "Bhoomika Nanjaraja"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r init, include=F}
+# The package "ezids" (EZ Intro to Data Science) includes some helper functions we developed for the course. 
+# Some of the frequently used functions are loadPkg(), xkabledply(), xkablesummary(), uzscale(), etc.
+# You will need to install it (once) from GitHub.
+# library(devtools)
+# devtools::install_github("physicsland/ezids")
+# Then load the package in your R session.
+library(ezids)
+library(ggplot2)
+library(RColorBrewer)
+library(dplyr)
+library(corrplot)
+```
+
+```{r}
+df = read.csv("US_Accidents_EDA.csv")
+```
+
+```{r}
+summary(df)
+```
+
+```{r}
+df$Duration <- difftime(df$End_Time,df$Start_Time,units="mins")
+```
+
+#Replacing the True/False Column Values With 0,1.
+
+```{r}
+df$Amenity <- ifelse(df$Amenity, 1, 0)
+df$Bump <- ifelse(df$Bump, 1, 0)
+df$Crossing <- ifelse(df$Crossing, 1, 0)
+df$Give_Way <- ifelse(df$Give_Way, 1, 0)
+df$Junction <- ifelse(df$Junction, 1, 0)
+df$No_Exit <- ifelse(df$No_Exit, 1, 0)
+df$Railway <- ifelse(df$Railway, 1, 0)
+df$Roundabout <- ifelse(df$Roundabout, 1, 0)
+df$Station <- ifelse(df$Station, 1, 0)
+df$Stop <- ifelse(df$Stop, 1, 0)
+df$Traffic_Calming <- ifelse(df$Traffic_Calming, 1, 0)
+df$Traffic_Signal <- ifelse(df$Traffic_Signal, 1, 0)
+df$Turning_Loop <- ifelse(df$Turning_Loop, 1, 0)
+mat <- select(df,Temperature.F.,Pressure.in.,Visibility.mi.,Wind_Speed.mph.,Amenity,Bump,Crossing,Give_Way,Junction,No_Exit,Railway,Roundabout,Station,Stop,Traffic_Calming,Traffic_Signal)
+```
+
+#Code For Generating a HeatMap to understand the strength and direction of the variables.
+
+```{r}
+corr_mat=cor(mat,method="s")
+ corrplot(corr_mat, method = 'color', order = 'alphabet', addCoef.col = "white", number.digits = 2, number.cex = 0.75, col = colorRampPalette(c("darkred","lightblue","midnightblue"))(100))
+```
+
+```{r}
+ggplot(mat, aes(x=Traffic_Signal, y=Crossing,col=Severity)) + geom_point()
+```
+```{r}
+ggplot(survey, aes(x=fruit, y=people, fill=fruit)) + 
+  geom_bar(stat="identity") +
+  geom_text(aes(label=people), vjust=-0.3, size=3.5)
+```
