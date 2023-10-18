@@ -29,7 +29,7 @@ library(corrplot)
 ```
 
 ```{r}
-df = read.csv("US_Accidents_EDA.csv")
+df = read.csv("US_accidents_EDA.csv")
 ```
 
 ```{r}
@@ -56,7 +56,7 @@ df$Stop <- ifelse(df$Stop, 1, 0)
 df$Traffic_Calming <- ifelse(df$Traffic_Calming, 1, 0)
 df$Traffic_Signal <- ifelse(df$Traffic_Signal, 1, 0)
 df$Turning_Loop <- ifelse(df$Turning_Loop, 1, 0)
-mat <- select(df,Temperature.F.,Pressure.in.,Visibility.mi.,Wind_Speed.mph.,Amenity,Bump,Crossing,Give_Way,Junction,No_Exit,Railway,Roundabout,Station,Stop,Traffic_Calming,Traffic_Signal)
+mat <- select(df,Temperature.F.,Pressure.in.,Visibility.mi.,Wind_Speed.mph.,Severity,Amenity,Bump,Crossing,Give_Way,Junction,No_Exit,Railway,Roundabout,Station,Stop,Traffic_Calming,Traffic_Signal)
 ```
 
 #Code For Generating a HeatMap to understand the strength and direction of the variables.
@@ -66,11 +66,23 @@ corr_mat=cor(mat,method="s")
  corrplot(corr_mat, method = 'color', order = 'alphabet', addCoef.col = "white", number.digits = 2, number.cex = 0.75, col = colorRampPalette(c("darkred","lightblue","midnightblue"))(100))
 ```
 
+
 ```{r}
-ggplot(mat, aes(x=Traffic_Signal, y=Crossing,col=Severity)) + geom_point()
+ggplot(mat, aes(x = factor(Traffic_Calming), fill = factor(Severity))) +
+    geom_bar(stat="count",position = position_dodge(width = 0.8))+scale_fill_brewer(palette = "Set1")+xlab("Traffic_Calming") +ylab("Frequency") +ggtitle("Frequency of Traffic Calming Per Severity")
 ```
+
 ```{r}
-ggplot(survey, aes(x=fruit, y=people, fill=fruit)) + 
-  geom_bar(stat="identity") +
-  geom_text(aes(label=people), vjust=-0.3, size=3.5)
+ggplot(mat, aes(x = factor(Bump), fill = factor(Severity))) +
+    geom_bar(stat="count",position = position_dodge(width = 0.8))+scale_fill_brewer(palette = "Set1")+xlab("Bump") +ylab("Frequency") +ggtitle("Frequency of Bump Per Severity")
+```
+
+```{r}
+ggplot(mat, aes(x = factor(Traffic_Signal), fill = factor(Severity))) +
+    geom_bar(stat="count",position = position_dodge(width = 0.8))+scale_fill_brewer(palette = "Set1")+xlab("Traffic_Signal") +ylab("Frequency") +ggtitle("Frequency of Traffic Signal Per Severity")
+```
+
+```{r}
+ggplot(mat, aes(x = factor(Crossing), fill = factor(Severity))) +
+    geom_bar(stat="count",position = position_dodge(width = 0.8))+scale_fill_brewer(palette = "Set1")+xlab("Crossing") +ylab("Frequency") +ggtitle("Frequency of Crossing Per Severity")
 ```
