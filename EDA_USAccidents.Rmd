@@ -22,6 +22,8 @@ output:
 library(ezids)
 library(ggplot2)
 library(dplyr)
+library(lubridate)
+library(tidyverse)
 ```
 ```{r setup, include=FALSE}
 # Some of common RMD options (and the defaults) are: 
@@ -31,33 +33,74 @@ knitr::opts_chunk$set(warning = F, message = F)
 options(scientific=T, digits = 3) 
 # options(scipen=9, digits = 3) 
 ```
+#Introduction
 
+#Data Description
 
+#SMART Questions
+
+#EDA
+
+# Hypothesis Testing
+**Hypothesis: There is a difference in the average number of accidents across different months of the year.
+•	Null Hypothesis (H0): The average number of accidents is the same for all months.
+•	Alternative Hypothesis (H1): The average number of accidents varies by month.
+•	Test: Analysis of Variance (ANOVA) or Kruskal-Wallis test for non-parametric data, followed by post-hoc tests if the null hypothesis is rejected to identify which months are different.**
 ```{r}
-data = read.csv("US_Accidents_updated1.csv")
-str(data)
+accidents <- read_csv("/Users/apoorvareddy/Downloads/Academic/DATS6101/Project/US_Accidents_EDA.csv")
+accidents$month <- lubridate::month(accidents$Start_Time)
+accidents$accident_count <- 1
+
+accidents$month = factor(accidents$month, order=T)
+anova_result <- aov(accident_count ~ month, data = accidents)
+summary(anova_result)
+
+xkabledply(anova_result, title = "ANOVA result summary") 
 ```
 
+**Hypothesis: Accidents are more likely to occur on weekends compared to weekdays.
+•	Null Hypothesis (H0): The probability of an accident on weekends is the same as on weekdays.
+•	Alternative Hypothesis (H1): The probability of an accident on weekends is greater than on weekdays.**
 ```{r}
-xkablesummary(data)
+accidents$day_type <- ifelse(weekdays(accidents$Start_Time) %in% c("Saturday", "Sunday"), "Weekend", "Weekday")
+
+contingency_table <- table(accidents$day_type)
+print(contingency_table)
+chi_square_result <- chisq.test(contingency_table, correct = FALSE)
+#xkabledply(chi_square_result)
+print(chi_square_result)
 ```
 
-```{r}
-ggplot(data, aes(x = SeverityProportion)) +
-  geom_histogram(binwidth = 0.001, fill = "blue", color = "black") +
-  labs(title = "Distribution of Severity Proportion",
-       x = "Severity Proportion",
-       y = "Frequency")
-```
+**Hypothesis: The time of day (morning, afternoon, evening, night) has an effect on the occurrence of fatal accidents.
+•	Null Hypothesis (H0): The time of day does not affect the occurrence of fatal accidents.
+•	Alternative Hypothesis (H1): The time of day affects the occurrence of fatal accidents.**
 
 ```{r}
-ggplot(data, aes(x = factor(Amenity))) +
-  geom_bar(fill = "green") +
-  labs(title = "Cities with Nearby Amenities (1) vs. Without Amenities (0)",
-       x = "Amenity",
-       y = "Frequency")
+LATE_NIGHT <- 'Late Night'
+NIGHT <- 'Night'
+MORNING <- 'Morning'
+AFTERNOON <- 'Afternoon'
+EVENING <- 'Evening'
+
+accidents$Hour <- lubridate::hour(accidents$Start_Time)
+get_time_of_day <- function(hour) {
+  if (hour >= 5 && hour < 12) {
+    return(MORNING)
+  } else if (hour >= 12 && hour < 16) {
+    return(AFTERNOON)
+  } else if (hour >= 16 && hour < 20) {
+    return(EVENING)
+  } else {
+    return(NIGHT)
+  }
+}
+
+accidents$time_of_the_day <- mapply(get_time_of_day, accidents$Hour)
+
+contingency_table <- table(accidents$time_of_the_day)
+print(contingency_table)
+chi_square_result <- chisq.test(contingency_table, correct = FALSE)
+print(chi_square_result)
 ```
 
-```{r}
-table(data$Amenity)
-```
+
