@@ -1807,9 +1807,7 @@ Bagepalli, Devarsh Apurva Sheth</h4>
 accidents across different months of the year. • Null Hypothesis (H0):
 The average number of accidents is the same for all months. •
 Alternative Hypothesis (H1): The average number of accidents varies by
-month. • Test: Analysis of Variance (ANOVA) or Kruskal-Wallis test for
-non-parametric data, followed by post-hoc tests if the null hypothesis
-is rejected to identify which months are different.</strong></p>
+month.</strong></p>
 <pre class="r"><code>accidents &lt;- read_csv(&quot;/Users/apoorvareddy/Downloads/Academic/DATS6101/Project/US_Accidents_EDA.csv&quot;)
 accidents$month &lt;- lubridate::month(accidents$Start_Time)
 accidents$accident_count &lt;- 1
@@ -1889,11 +1887,17 @@ NA
 </tr>
 </tbody>
 </table>
+<p>The analysis does not provide enough evidence to conclude that there
+is a statistically significant difference in the average number of
+accidents across different months of the year. Therefore, we fail to
+reject the null hypothesis, and the data does not support the idea that
+the month of the year has a significant impact on the number of
+accidents.</p>
 <p><strong>Hypothesis: Accidents are more likely to occur on weekends
 compared to weekdays. • Null Hypothesis (H0): The probability of an
 accident on weekends is the same as on weekdays. • Alternative
-Hypothesis (H1): The probability of an accident on weekends is greater
-than on weekdays.</strong></p>
+Hypothesis (H1): The probability of an accident on weekdays is greater
+than on weekends.</strong></p>
 <pre class="r"><code>accidents$day_type &lt;- ifelse(weekdays(accidents$Start_Time) %in% c(&quot;Saturday&quot;, &quot;Sunday&quot;), &quot;Weekend&quot;, &quot;Weekday&quot;)
 
 contingency_table &lt;- table(accidents$day_type)
@@ -1909,6 +1913,10 @@ print(chi_square_result)</code></pre>
 ## 
 ## data:  contingency_table
 ## X-squared = 3e+06, df = 1, p-value &lt;2e-16</code></pre>
+<p>The results of the chi-squared test provide strong evidence to reject
+the null hypothesis. The data supports the alternative hypothesis, which
+implies that the probability of accidents is greater on weekdays than on
+weekends.</p>
 <p><strong>Hypothesis: The time of day (morning, afternoon, evening,
 night) has an effect on the occurrence of fatal accidents. • Null
 Hypothesis (H0): The time of day does not affect the occurrence of fatal
@@ -1947,6 +1955,12 @@ print(chi_square_result)</code></pre>
 ## 
 ## data:  contingency_table
 ## X-squared = 6e+05, df = 3, p-value &lt;2e-16</code></pre>
+<p>The results of the chi-squared test provide strong evidence to reject
+the null hypothesis. The data supports the alternative hypothesis,
+indicating that the time of day does affect the occurrence of fatal
+accidents. This suggests that there is a statistically significant
+relationship between the time of day and the occurrence of fatal
+accidents.</p>
 </div>
 
 
