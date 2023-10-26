@@ -24,7 +24,20 @@ library(ggplot2)
 library(dplyr)
 library(lubridate)
 library(tidyverse)
+library(scales)
+library(plotly)
+library(gridExtra)
+library(tidytext)
+library(modelr)
+library(caret)
+library(ROSE)
+library(glmnet)
+library(randomForest)
+library(ggrepel)
+library(patchwork)
+library(readr)
 ```
+
 ```{r setup, include=FALSE}
 # Some of common RMD options (and the defaults) are: 
 # include=T, eval=T, echo=T, results='hide'/'asis'/'markup',..., collapse=F, warning=T, message=T, error=T, cache=T, fig.width=6, fig.height=4, fig.dim=c(6,4) #inches, fig.align='left'/'center','right', 
@@ -39,14 +52,284 @@ options(scientific=T, digits = 3)
 
 #SMART Questions
 
-#EDA
+
+# Exploratory Data Analysis
+
+## Reading the US Accidents Related data from CSV File.
+
+```{r}
+accidents <- read_csv("/Users/bhoomikan/Documents/Sample_Projects_DS/US_Accidents_EDA.csv")
+```
+
+## Map For Accident Distribution In USA
+
+```{r}
+address <- c("Country", "City", "County", "Street", "Zipcode")
+df_add <- accidents %>% select(-all_of(address))
+
+df_add <- df_add %>% 
+  mutate(Severity = as.character(Severity)) %>% 
+  mutate_if(is.logical, as.character)
+
+df_add <- df_add %>% 
+  type_convert() %>%
+  mutate(Severity = factor(Severity)) %>%
+  mutate_if(is.logical, factor) %>%
+  mutate_if(is.character, factor)
+
+states <- map_data("state") %>% as_tibble() %>% select(long, lat, group, region)
+states_abb <- read_csv("/Users/bhoomikan/Documents/Sample_Projects_DS/data.csv") %>%
+  mutate(State = tolower(State)) %>%
+  select(State, Code) %>%
+  rename("State_full" = State)
+accident_count <- df_add %>%
+  count(State) %>%
+  left_join(states_abb, by = c("State" = "Code"))
+
+states <- states %>%
+  left_join(accident_count, by = c("region" = "State_full"))
+# top 10 states
+top_10 <- accident_count %>%
+  arrange(desc(n)) %>%
+  head(10)
+top_10 <- top_10$State %>% unlist()
+
+top_10_map <- states %>%
+  filter(State %in% top_10)
+top_10_label <- top_10_map %>%
+  group_by(region, State) %>%
+  summarise(long = mean(long), lat = mean(lat))
+
+ggplot(states, aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = n), color = "#636363", size = 0.1) +
+  geom_polygon(data = top_10_map, color = "red", fill = NA, size = 0.8) +
+  scale_fill_gradient(low = "#fee5d9", high = "#de2d26",
+                      name = "Accident Count", labels = unit_format(unit = "K", scale = 1e-03)) +
+  ggrepel::geom_label_repel(mapping = aes(label = State, group = 1), data = top_10_label) +
+  theme_minimal() +
+  coord_quickmap() +
+  labs(title = "Accident distribution in the U.S.",
+       x = "Longitude",
+       y = "Latitude")
+```
+
+<b>The map showcases the top 10 states with the highest accident frequencies recorded between 2016 and 2023. Notably, California leads the list with nearly 1.5 million accidents, and Florida follows closely with 829.646 million accidents during this period.</b>
+
+## Bar Graph For Accident Distribution In USA
+
+```{r}
+states_abb <- accidents %>% mutate(State = tolower(State)) %>% select(State) %>% rename("State_full" = State)
+accident_count <- accidents %>% count(State)
+
+# top 10 states
+top_10 <- accident_count %>%
+  arrange(desc(n)) %>%
+  head(10)
+top_10 <- top_10$State %>% unlist()
+
+accidents %>% 
+  filter(State %in% top_10) %>%
+  count(State) %>%
+  ggplot(aes(reorder(State, n), n)) +
+  geom_col() +
+  geom_label(aes(label = n), nudge_y = -30000) +
+  labs(x = NULL, y = "Number of accidents",
+       title = "Top 10 States with the most accidents") +
+  scale_x_discrete(labels = rev(c("California", "Florida","Texas", "South Carolina","New York",
+                                  "North Carolina", "Pennsylvania","Virginia",
+                                  "Minnesota", "Oregon"))) +
+  scale_y_continuous(breaks = seq(0, 700000, 100000), labels = scales::unit_format(unit = "K", scale = 1e-03)) +
+  coord_flip()
+```
+
+<b>The bar graph above illustrates the top 10 states with the highest accident frequencies between 2016 and 2023. California stands out as the state with the highest number of accidents during this period, accounting for approximately 20% of the total accidents, with Florida following closely.</b>
+
+## Comparison of proportion of accidents occuring at different times of the day
+
+```{r}
+LATE_NIGHT <- 'Late Night'
+NIGHT <- 'Night'
+MORNING <- 'Morning'
+AFTERNOON <- 'Afternoon'
+EVENING <- 'Evening'
+
+INTERVAL_5_6 <- '5 to 6'
+INTERVAL_6_7 <- '6 to 7'
+INTERVAL_7_8 <- '7 to 8'
+INTERVAL_8_9 <- '8 to 9'
+INTERVAL_9_10 <- '9 to 10'
+INTERVAL_10_11 <- '10 to 11'
+INTERVAL_11_12 <- '11 to 12'
+
+accidents$Hour <- strftime(accidents$Start_Time, format="%H")
+
+get_time_of_day <- function(hour) {
+  if (hour >= 5 && hour < 12) {
+    return(MORNING)
+  } else if (hour >= 12 && hour < 16) {
+    return(AFTERNOON)
+  } else if (hour >= 16 && hour < 20) {
+    return(EVENING)
+  } else {
+    return(NIGHT)
+  }
+}
+
+accidents$Hour <- as.numeric(accidents$Hour)
+accidents$time_of_the_day <- mapply(get_time_of_day, accidents$Hour)
+
+Time_of_the_day <- accidents$time_of_the_day
+ID <- accidents$ID
+Severity <- accidents$Severity
+
+bb <- aggregate(ID ~ Time_of_the_day, accidents, FUN=length)
+bb$total = nrow(accidents)
+bb <- xtabs(bb$ID / bb$total ~ bb$Time_of_the_day, bb)
+barplot(t(bb)
+        ,main="Comparison of proportion of accidents \noccuring at different times of the day"
+        ,ylab="Proportion"
+        ,xlab="Time of the day"
+        ,col=c("mistyrose")
+        ,las=1        
+        ,args.legend=list(x="topleft")
+        ,axes=F
+        ,cex.axis=1.2
+        ,cex.names=1.2
+        ,cex.lab=1
+        ,cex.main=1.2)
+axis(side=2,at=c(0,0.1,0.2,0.3,0.4),labels=c("0","0.1","0.2","0.3","0.4"),las=2)
+```
+
+<b>The bar graph above illustrates the distribution of accidents across different times of the day, highlighting that the majority of accidents occur during daylight hours. Morning, afternoon, and evening collectively account for around 68% of all accidents, while the nighttime period represents approximately 30% of the total accidents.</b>
+
+## Bar graph to display the hourly distribution of accidents
+
+```{r}
+accidents_new <- accidents %>% mutate(startHr=hour(Start_Time))
+accidents_severity <- accidents_new %>% group_by(startHr) %>% summarise(mean(Severity))
+accidents_count <- accidents_new %>%group_by(startHr, Severity) %>%summarise(n =n())
+accident_summary <- merge(accidents_severity,accidents_count)
+accident_summary <- accident_summary %>% rename(sev_avg = "mean(Severity)")
+ggplot(data = accident_summary) + 
+  geom_col(mapping=aes(x=startHr, y=n, fill=sev_avg)) +
+  scale_fill_distiller(palette="Reds", trans= "reverse") +
+  labs(
+    title = "Amount of car accidents by hour",
+    x = "Hour",
+    y = "Number of accidents",
+    caption = "A Countrywide Traffic Accident Dataset, 2016-2023.",
+    fill = "Average Severity") +
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))
+```
+
+<b>The bar graph above visually displays the hourly distribution of accidents, with the legend indicating the severity caused by these accidents. Notably, the data reveals that the majority of accidents, approximately 60%, transpire between 5 AM and 5 PM. Subsequently, there is a gradual decrease in accident frequency from 5 PM until 3 AM the following morning. Interestingly, when examining accident severity, those transpiring between 6 PM and 10 PM tend to result in higher severity accidents.</b>
+
+## Distribution of Accidents by Day & Hour
+
+```{r}
+accidents$hr <- lubridate::hour(accidents$Start_Time)
+accidents$day <- lubridate::day(accidents$Start_Time)
+accidents$week <- lubridate::week(accidents$Start_Time)
+accidents$month <- lubridate::month(accidents$Start_Time)
+accidents$Weekday <- lubridate::wday(accidents$Start_Time, label=T, abbr=F)
+accidents$Weekdaya <- lubridate::wday(accidents$Start_Time, label=T, abbr=T)
+accidents$Year <- lubridate::year(accidents$Start_Time)
+accidents %>% group_by(hr, Weekday) %>%
+  summarise(n = n()) %>%
+  ggplot(aes(hr, n, fill = Weekday)) + 
+  geom_bar(stat = "identity", show.legend = F) +
+  facet_grid(~Weekday) +   labs(x = "24 hours of the day", y = "Count of Accidents", 
+                                title = "Accidents by Day & Hour") + theme_light(base_size = 11) +
+  scale_fill_brewer(palette=("Oranges")) + 
+  theme(strip.background = element_rect(fill="grey90")) +
+  theme(strip.text = element_text(size = 13, color = 'black')) +
+  scale_y_continuous(labels = scales::comma)
+```
+
+<b>The graph depicted above illustrates the distribution of accidents across various days. It is evident that the majority of accidents have occurred on weekdays, with Thursdays and Fridays leading the statistics, accounting for a combined total of 34.77% of all accidents. Wednesdays follow closely, making up around 17% of the total accidents. Tuesdays account for 16.6%, Mondays for 15.6%, while Saturdays and Sundays collectively represent 16% of the total accidents.</b>
+
+## Distribution of accidents in various weather conditions
+
+```{r}
+accidents %>%
+  group_by(Weather_Condition) %>%
+  filter(Severity==4) %>%
+  summarise(count = n()/nrow(.)*100) %>%
+  filter(count>1)%>%
+  arrange(-count) -> severity4_weather
+severity4_weather
+
+#options(repr.plot.width = 20, repr.plot.height = 8)
+severity4_weather %>%
+  ggplot() +
+  geom_col(mapping=aes(x=reorder(Weather_Condition, -count), y=count, fill=Weather_Condition))+ 
+  theme(text = element_text(size=10),plot.title = element_text(hjust = 0.5, vjust = 1),legend.key.width = unit(0.5, "cm"), legend.key.height = unit(0.25, "cm")) +
+  labs(x = "Weather condition", y="%", title ="Severity 4 acccidents by weather")-> severity4_weather_plot
+
+accidents %>%
+  group_by(Weather_Condition) %>%
+  filter(Severity==3) %>%
+  summarise(count = n()/nrow(.)*100) %>%
+  filter(count>1)%>%
+  arrange(-count) -> severity3_weather
+severity3_weather
+
+#options(repr.plot.width = 20, repr.plot.height = 8)
+severity3_weather %>%
+  ggplot() +
+  geom_col(mapping=aes(x=reorder(Weather_Condition, -count), y=count, fill=Weather_Condition))+ 
+  theme(text = element_text(size=10),plot.title = element_text(hjust = 0.5, vjust = 1),legend.key.width = unit(0.5, "cm"), legend.key.height = unit(0.25, "cm")) +
+  labs(x = "Weather condition", y="%", title ="Severity 3 acccidents by weather") -> severity3_weather_plot
+
+accidents %>%
+  group_by(Weather_Condition) %>%
+  filter(Severity==2) %>%
+  summarise(count = n()/nrow(.)*100) %>%
+  filter(count>1)%>%
+  arrange(-count) -> severity2_weather
+severity2_weather
+
+#options(repr.plot.width = 20, repr.plot.height = 8)
+severity2_weather %>%
+  ggplot() +
+  geom_col(mapping=aes(x=reorder(Weather_Condition, -count), y=count, fill=Weather_Condition))+ 
+  theme(text = element_text(size=10),plot.title = element_text(hjust = 0.5, vjust = 1),legend.key.width = unit(0.5, "cm"), legend.key.height = unit(0.25, "cm")) +
+  labs(x = "Weather condition", y="%", title ="Severity 2 acccidents by weather") -> severity2_weather_plot
+
+accidents %>%
+  group_by(Weather_Condition) %>%
+  filter(Severity==1) %>%
+  summarise(count = n()/nrow(.)*100) %>%
+  filter(count>1)%>%
+  arrange(-count) -> severity1_weather
+severity1_weather
+
+severity1_weather %>%
+  ggplot() +
+  geom_col(mapping=aes(x=reorder(Weather_Condition, -count), y=count, fill=Weather_Condition))+ 
+  theme(text = element_text(size=10),plot.title = element_text(hjust = 0.5, vjust = 1),legend.key.width = unit(0.5, "cm"), legend.key.height = unit(0.25, "cm"))+
+  labs(x = "Weather condition", y="%", title ="Severity 1 acccidents by weather")-> severity1_weather_plot
+
+
+combined_plot <- (severity4_weather_plot | severity3_weather_plot) / (severity2_weather_plot | severity1_weather_plot)
+
+# Set the size for the combined plot
+options(repr.plot.width = 120, repr.plot.height = 12)
+
+# Display the combined plot
+combined_plot
+```
+
+
+<b>The graphs above depict the distribution of accidents in various weather conditions for each severity level. It is discernible that the majority of accidents have taken place when the weather was either fair or cloudy, regardless of severity level. In essence, nearly 60-70% of accidents resulting in severity levels 1, 2, or 3 occurred under fair or cloudy weather conditions, and a substantial 97% of severity 4 accidents also transpired under fair or cloudy weather conditions. The remaining 3% of severity 4 accidents were associated with light rain, with no other weather conditions significantly impacting accidents leading to Severity 4.</b>
+
+
 
 # Hypothesis Testing
 **Hypothesis: There is a difference in the average number of accidents across different months of the year.
 •	Null Hypothesis (H0): The average number of accidents is the same for all months.
 •	Alternative Hypothesis (H1): The average number of accidents varies by month.**
 ```{r}
-accidents <- read_csv("/Users/apoorvareddy/Downloads/Academic/DATS6101/Project/US_Accidents_EDA.csv")
 accidents$month <- lubridate::month(accidents$Start_Time)
 accidents$accident_count <- 1
 
