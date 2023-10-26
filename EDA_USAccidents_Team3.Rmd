@@ -1,9 +1,9 @@
 ---
 title: "US_Accidents_Analysis"
-author: "Team: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Devarsh Apurva Sheth"
+author: "Team 3: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Devarsh Apurva Sheth"
 output:
   html_document:
-    code_folding: show
+    code_folding: hide
     number_sections: false
     toc: yes
     toc_depth: 3
@@ -29,9 +29,9 @@ library(plotly)
 library(gridExtra)
 library(tidytext)
 library(modelr)
-library(caret)
+#library(caret)
 library(ROSE)
-library(glmnet)
+#library(glmnet)
 library(randomForest)
 library(ggrepel)
 library(patchwork)
@@ -46,19 +46,76 @@ knitr::opts_chunk$set(warning = F, message = F)
 options(scientific=T, digits = 3) 
 # options(scipen=9, digits = 3) 
 ```
-#Introduction
+# Introduction
+In the United States, road safety remains a critical public concern, underscored by the staggering occurrence of over 6 million passenger car accidents annually. The project "Navigating Road Safety: Insights & Predictions on US Accidents (2016-2023)" confronts this challenge, seeking to unravel the complex interplay of environmental and man-made factors contributing to these statistics. By dissecting the circumstances surrounding road incidents, this comprehensive study emphasizes the imperative of understanding the multifaceted causes of accidents. This approach is not just about quantifying the incidents but also about pioneering strategies for mitigating risks and enhancing passenger safety. The project is poised to delve into an analytical exploration, scrutinizing years of data to decode patterns and predictors that can enlighten future safety protocols. The focus extends beyond the immediate, tangible factors, encompassing an examination of meteorological influences, vehicular patterns, infrastructural variances, and human elements in the accident data matrix. The ultimate objective transcends the realm of data analysis, aspiring to catalyze a transformative change in road safety measures, thereby reducing casualties. This venture stands as a testament to the belief that every accident prevented is a stride towards preserving human life and enhancing the quality of road travel for all.
 
-#Data Description
+# Data Description
+This dataset summarizes the analysis of comprehensive countrywide car accident records that cover 49 states in the USA. The dataset was collected in real-time using multiple traffic APIs, resulting in over 7.7 million recorded instances spanning various locations across the United States. The dataset encompasses 46 attributes, capturing information on accident locations, accident severity, and the presence of amenities in the proximity. \
 
-#SMART Questions
+**Data Cleaning**
+One of the initial steps in our analysis was to perform data cleaning. The dataset contained a significant number of null values, which could have potentially impacted the quality of our analysis and models. These NULL values were a result of a bad response from the traffic APIs or some connection error. These missing values were addressed through various techniques, including imputation and data removal where appropriate. Even the response from the API for certain keys were so bad that we had to drop the whole column from the dataset.\
+
+**Feature Selection**
+To gain meaningful insights from the dataset and facilitate future predictive modeling, a feature selection process was undertaken. Out of the initial 46 columns, only 15 columns were retained for further analysis. The selection was based on the relevance and significance of the attributes to our research objectives. The following features demonstrated the most promising aspects and were retained for further analysis:\
+
+**1.	Location Information:**\
+•	Latitude and Longitude: These attributes provide precise accident coordinates, enabling accurate mapping and location-based analysis.\
+•	City and County: These attributes are crucial for understanding the regional impact of accidents and are valuable for future paramedic service optimization.\
+
+**2.	Accident Severity:**\
+•	Severity: The severity of an accident is a critical factor for assessing the impact and prioritizing paramedic services. In simple words, here in the dataset, severity shows the severity of the accident, a number between 1 and 4, where 1 indicates the least impact on traffic (i.e., short delay as a result of the accident) and 4 indicates a significant impact on traffic (i.e., long delay).\
+
+**3.	Proximity to Amenities:**\
+•	Amenity In Proximity: Identifying the presence of amenities near accident locations can help determine the availability of assistance and resources.\
+
+**4.	Paramedic Response Time (Future Scope):**\
+•	Incorporating paramedic response time in cities as a new feature provides valuable information for optimizing emergency services. This data can be used to identify locations where paramedic services need improvement.\
+
+**5.	Time of the Day:**\
+•	Time_of_the_day: Understanding the time of day when an accident occurs can provide insights into factors such as visibility, traffic volume, and driver behavior. This attribute is crucial for time-based analysis.\
+
+**6.	Hour:**\
+•	Hour: The specific hour of the day when an accident takes place can help identify peak accident times and assist in allocating resources accordingly.\
+
+**7.	Weekday:**\
+•	Weekday: Identifying the day of the week can aid in recognizing patterns related to workdays, weekends, and traffic flow variations. It's important for temporal analysis.\
+
+**8.	Weather Condition:**\
+•	Weather condition: Weather conditions can be a significant contributing factor to accidents. Understanding the prevailing weather conditions at the time of the accident is essential for comprehensive analysis.\
+
+The analysis of the countrywide car accident dataset involved cleaning the data, addressing null values, and performing feature selection. From the initial 46 columns, we narrowed down to 15 columns that are pertinent to our research objectives and future scope, which includes optimizing paramedic services. The retained features, such as location information, accident severity, proximity to amenities, paramedic response time, and severity proportion, provide a solid foundation for further analysis and predictive modeling.\
+This refined dataset and feature selection process will be instrumental in developing data-driven insights and decision support tools for accident management and the optimization of paramedic services across the USA.
+
+# SMART Questions
+In our comprehensive analysis of the extensive car accident dataset, we posed several critical questions to uncover valuable insights and enhance safety measures. Let's delve into the key analytical questions that guided our research.
+
+**1. Seasonal Analysis:**
+"The first question addressed seasonality. We sought to determine if there was a statistically significant difference in the average number of accidents across different months of the year."
+"This analysis was conducted to understand whether certain months experienced higher accident rates, possibly due to weather conditions, holidays, or other factors."
+
+**2. Weekday vs. Weekend Comparison:**
+"The second question explored the occurrence of accidents during the week compared to the weekend."
+"We aimed to ascertain whether accidents were statistically more frequent on weekdays in contrast to weekends. These insights were sought to guide resource allocation and enforcement efforts."
+
+**3. Time of Day Analysis:**
+"Next, we investigated the impact of the time of day on the occurrence of fatal accidents."
+"We categorized time into morning, afternoon, evening, and night to determine if there was a measurable and statistically significant effect within specified geographic areas over defined time periods. This information was intended to influence emergency response planning."
+
+**4. Regional Accident Rates:**
+"Moving forward, we identified states or regions in the U.S. with consistently high accident rates."
+"Our goal was to explore geographic patterns and trends, providing insights into which areas required more targeted safety interventions."
+
+**5. Weather Conditions and Accident Severity:**
+"Finally, we examined the influence of various weather conditions on the occurrence and severity of accidents."
+"We investigated associations between specific types of accidents and weather conditions such as rain, snow, or fog. These insights were intended to inform drivers and authorities about adjusting behavior and strategies in adverse weather."
 
 
 # Exploratory Data Analysis
 
-## Reading the US Accidents Related data from CSV File.
+Reading the US Accidents Related data from CSV File.
 
 ```{r}
-accidents <- read_csv("/Users/bhoomikan/Documents/Sample_Projects_DS/US_Accidents_EDA.csv")
+accidents <- read_csv("/Users/apoorvareddy/Downloads/Academic/DATS6101/Project/US_Accidents_EDA.csv")
 ```
 
 ## Map For Accident Distribution In USA
@@ -78,7 +135,7 @@ df_add <- df_add %>%
   mutate_if(is.character, factor)
 
 states <- map_data("state") %>% as_tibble() %>% select(long, lat, group, region)
-states_abb <- read_csv("/Users/bhoomikan/Documents/Sample_Projects_DS/data.csv") %>%
+states_abb <- read_csv("data.csv") %>%
   mutate(State = tolower(State)) %>%
   select(State, Code) %>%
   rename("State_full" = State)
@@ -326,8 +383,8 @@ combined_plot
 
 
 # Hypothesis Testing
-**Hypothesis: There is a difference in the average number of accidents across different months of the year.
-•	Null Hypothesis (H0): The average number of accidents is the same for all months.
+**Hypothesis: There is a difference in the average number of accidents across different months of the year.\
+•	Null Hypothesis (H0): The average number of accidents is the same for all months.\
 •	Alternative Hypothesis (H1): The average number of accidents varies by month.**
 ```{r}
 accidents$month <- lubridate::month(accidents$Start_Time)
@@ -342,8 +399,8 @@ xkabledply(anova_result, title = "ANOVA result summary")
 
 The analysis does not provide enough evidence to conclude that there is a statistically significant difference in the average number of accidents across different months of the year. Therefore, we fail to reject the null hypothesis, and the data does not support the idea that the month of the year has a significant impact on the number of accidents.
 
-**Hypothesis: Accidents are more likely to occur on weekends compared to weekdays.
-•	Null Hypothesis (H0): The probability of an accident on weekends is the same as on weekdays.
+**Hypothesis: Accidents are more likely to occur on weekends compared to weekdays.\
+•	Null Hypothesis (H0): The probability of an accident on weekends is the same as on weekdays.\
 •	Alternative Hypothesis (H1): The probability of an accident on weekdays is greater than on weekends.**
 ```{r}
 accidents$day_type <- ifelse(weekdays(accidents$Start_Time) %in% c("Saturday", "Sunday"), "Weekend", "Weekday")
@@ -357,8 +414,8 @@ print(chi_square_result)
 
 The results of the chi-squared test provide strong evidence to reject the null hypothesis. The data supports the alternative hypothesis, which implies that the probability of accidents is greater on weekdays than on weekends.
 
-**Hypothesis: The time of day (morning, afternoon, evening, night) has an effect on the occurrence of fatal accidents.
-•	Null Hypothesis (H0): The time of day does not affect the occurrence of fatal accidents.
+**Hypothesis: The time of day (morning, afternoon, evening, night) has an effect on the occurrence of fatal accidents.\
+•	Null Hypothesis (H0): The time of day does not affect the occurrence of fatal accidents.\
 •	Alternative Hypothesis (H1): The time of day affects the occurrence of fatal accidents.**
 
 ```{r}
@@ -389,4 +446,14 @@ chi_square_result <- chisq.test(contingency_table, correct = FALSE)
 print(chi_square_result)
 ```
 
-The results of the chi-squared test provide strong evidence to reject the null hypothesis. The data supports the alternative hypothesis, indicating that the time of day does affect the occurrence of fatal accidents. This suggests that there is a statistically significant relationship between the time of day and the occurrence of fatal accidents.
+The results of the chi-squared test provide strong evidence to reject the null hypothesis. The data supports the alternative hypothesis, indicating that the time of day does affect the occurrence of fatal accidents. This suggests that there is a statistically significant relationship between the time of day and the occurrence of fatal accidents.\
+
+# Future Scope
+The future scope of this project heralds a transformative approach to road safety, with a keen focus on optimizing paramedical response through strategic amenity placement. By predicting the most advantageous locations for new paramedical setups, the initiative aims to drastically reduce response times following accidents. Leveraging data insights, we plan to identify areas with high incident concentrations yet minimal immediate medical services. This foresight would facilitate the establishment of advanced care units precisely where they are most needed, empowering a prompt and efficient emergency response. Beyond immediate aid, this strategic positioning of amenities underscores our commitment to comprehensive post-accident support, potentially minimizing fatalities and improving survival rates. This progression marks just the beginning, as future explorations could extend into enhancing preventative measures, ultimately weaving a tighter safety net across the nation's roads.
+
+# Conclusion
+In concluding our intensive study on road safety from 2016 to 2023, several pivotal revelations emerged. Contrary to initial assumptions, the severity of accidents showcased no significant correlation with environmental or man-made factors. This insight challenges preconceived notions, underscoring the complexity of accident causation and the necessity for broader safety measures. Furthermore, an alarming consistency was observed in the monthly accident rates, highlighting the persistency of these incidents.\
+
+Most striking, however, was the discovery that accident occurrences spiked during typical office and school hours, suggesting a direct link with high-density traffic periods. This pattern accentuates the urgency for heightened vigilance and enhanced safety protocols during these peak times. Compounding the issue, our research alarmingly revealed a stark absence of emergency amenities in close proximity to accident sites. This gap in the safety infrastructure is a clarion call for immediate remedial action, necessitating strategic placement of paramedical amenities to expedite emergency response.\
+
+Ultimately, while the findings unearth more questions than answers, they forge a path forward in our understanding and approach to road safety. They serve as a compelling directive for policymakers and stakeholders to recalibrate and bolster efforts, aiming for a future where road safety is not an aspiration but a given reality.
