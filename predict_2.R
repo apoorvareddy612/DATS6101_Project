@@ -1,0 +1,47 @@
+# Load necessary libraries
+library(dplyr)
+library(caret)
+library(ggplot2)
+
+# Load the dataset (assuming your dataset is stored in a variable called 'accidents_data')
+# Replace 'your_dataset.csv' with the actual file path or dataset name
+accidents_data <- read.csv('US_accidents_EDA.csv')
+
+
+# Data Preprocessing
+# Convert the 'Start_Time' column to a datetime object
+accidents_data$Start_Time <- as.POSIXct(accidents_data$Start_Time, format="%Y-%m-%d %H:%M:%S")
+
+# Extract day of the week and hour of the day
+accidents_data$DayOfWeek <- weekdays(accidents_data$Start_Time)
+accidents_data$HourOfDay <- format(accidents_data$Start_Time, "%H")
+
+# Convert day of the week to a factor
+accidents_data$DayOfWeek <- factor(accidents_data$DayOfWeek, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+
+# Convert hour of the day to numeric
+accidents_data$HourOfDay <- as.numeric(accidents_data$HourOfDay)
+
+# Create a binary variable indicating high or low chance of accidents (you can define a threshold)
+accidents_data$HighChance <- ifelse(accidents_data$Severity > 2, 1, 0)
+
+# Split the dataset into training and testing sets
+set.seed(123)
+split_index <- sample(nrow(accidents_data), size = 4000)
+train_data <- accidents_data[split_index, ]
+test_data <- accidents_data[-split_index, ]
+
+# Train a predictive model (using logistic regression in this case)
+model <- glm(HighChance ~ DayOfWeek + HourOfDay, data = train_data, family = "binomial")
+
+# Make predictions on the test set
+predictions <- predict(model, newdata = test_data, type = "response")
+
+# Convert probabilities to binary predictions
+binary_predictions <- ifelse(predictions > 0.5, 1, 0)
+
+# Evaluate the model
+binary_predictions <- as.factor(binary_predictions)
+test_data$HighChance <- as.factor(test_data$HighChance)
+confusion_matrix <- confusionMatrix(binary_predictions, test_data$HighChance)
+print(confusion_matrix)
