@@ -1,0 +1,88 @@
+---
+title: "US_Accidents_Analysis"
+author: "Team 3: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Devarsh Apurva Sheth"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+```{r,include=FALSE}
+# The package "ezids" (EZ Intro to Data Science) includes some helper functions we developed for the course. 
+# Some of the frequently used functions are loadPkg(), xkabledply(), xkablesummary(), uzscale(), etc.
+# You will need to install it (once) from GitHub.
+# library(devtools)
+# devtools::install_github("physicsland/ezids")
+# Then load the package in your R session.
+library(ezids)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(tidyverse)
+library(scales)
+library(plotly)
+library(gridExtra)
+library(tidytext)
+library(modelr)
+#library(caret)
+library(ROSE)
+#library(glmnet)
+library(randomForest)
+library(ggrepel)
+library(patchwork)
+library(readr)
+```
+
+
+```{r, include=FALSE}
+# Some of common RMD options (and the defaults) are: 
+# include=T, eval=T, echo=T, results='hide'/'asis'/'markup',..., collapse=F, warning=T, message=T, error=T, cache=T, fig.width=6, fig.height=4, fig.dim=c(6,4) #inches, fig.align='left'/'center','right', 
+knitr::opts_chunk$set(warning = F, message = F)
+# Can globally set option for number display format.
+options(scientific=T, digits = 3) 
+# options(scipen=9, digits = 3) 
+```
+# Introduction
+In the United States, road safety remains a critical public concern, underscored by the staggering occurrence of over 6 million passenger car accidents annually. The project "Navigating Road Safety: Insights & Predictions on US Accidents (2016-2023)" confronts this challenge, seeking to unravel the complex interplay of environmental and man-made factors contributing to these statistics. By dissecting the circumstances surrounding road incidents, this comprehensive study emphasizes the imperative of understanding the multifaceted causes of accidents. This approach is not just about quantifying the incidents but also about pioneering strategies for mitigating risks and enhancing passenger safety. The project is poised to delve into an analytical exploration, scrutinizing years of data to decode patterns and predictors that can enlighten future safety protocols. The focus extends beyond the immediate, tangible factors, encompassing an examination of meteorological influences, vehicular patterns, infrastructural variances, and human elements in the accident data matrix. The ultimate objective transcends the realm of data analysis, aspiring to catalyze a transformative change in road safety measures, thereby reducing casualties. This venture stands as a testament to the belief that every accident prevented is a stride towards preserving human life and enhancing the quality of road travel for all.
+
+# Data Description
+This dataset summarizes the analysis of comprehensive countrywide car accident records that cover 49 states in the USA. The dataset was collected in real-time using multiple traffic APIs, resulting in over 7.7 million recorded instances spanning various locations across the United States. The dataset encompasses 46 attributes, capturing information on accident locations, accident severity, and the presence of amenities in the proximity. \
+
+**Data Cleaning**
+One of the initial steps in our analysis was to perform data cleaning. The dataset contained a significant number of null values, which could have potentially impacted the quality of our analysis and models. These NULL values were a result of a bad response from the traffic APIs or some connection error. These missing values were addressed through various techniques, including imputation and data removal where appropriate. Even the response from the API for certain keys were so bad that we had to drop the whole column from the dataset.\
+
+**Feature Selection**
+To gain meaningful insights from the dataset and facilitate future predictive modeling, a feature selection process was undertaken. Out of the initial 46 columns, only 15 columns were retained for further analysis. The selection was based on the relevance and significance of the attributes to our research objectives. The following features demonstrated the most promising aspects and were retained for further analysis:\
+
+**1.	Location Information:**\
+•	Latitude and Longitude: These attributes provide precise accident coordinates, enabling accurate mapping and location-based analysis.\
+•	City and County: These attributes are crucial for understanding the regional impact of accidents and are valuable for future paramedic service optimization.\
+
+**2.	Accident Severity:**\
+•	Severity: The severity of an accident is a critical factor for assessing the impact and prioritizing paramedic services. In simple words, here in the dataset, severity shows the severity of the accident, a number between 1 and 4, where 1 indicates the least impact on traffic (i.e., short delay as a result of the accident) and 4 indicates a significant impact on traffic (i.e., long delay).\
+
+**3.	Proximity to Amenities:**\
+•	Amenity In Proximity: Identifying the presence of amenities near accident locations can help determine the availability of assistance and resources.\
+
+**4.	Paramedic Response Time (Future Scope):**\
+•	Incorporating paramedic response time in cities as a new feature provides valuable information for optimizing emergency services. This data can be used to identify locations where paramedic services need improvement.\
+
+**5.	Time of the Day:**\
+•	Time_of_the_day: Understanding the time of day when an accident occurs can provide insights into factors such as visibility, traffic volume, and driver behavior. This attribute is crucial for time-based analysis.\
+
+**6.	Hour:**\
+•	Hour: The specific hour of the day when an accident takes place can help identify peak accident times and assist in allocating resources accordingly.\
+
+**7.	Weekday:**\
+•	Weekday: Identifying the day of the week can aid in recognizing patterns related to workdays, weekends, and traffic flow variations. It's important for temporal analysis.\
+
+**8.	Weather Condition:**\
+•	Weather condition: Weather conditions can be a significant contributing factor to accidents. Understanding the prevailing weather conditions at the time of the accident is essential for comprehensive analysis.\
+
+The analysis of the countrywide car accident dataset involved cleaning the data, addressing null values, and performing feature selection. From the initial 46 columns, we narrowed down to 15 columns that are pertinent to our research objectives and future scope, which includes optimizing paramedic services. The retained features, such as location information, accident severity, proximity to amenities, paramedic response time, and severity proportion, provide a solid foundation for further analysis and predictive modeling.\
+This refined dataset and feature selection process will be instrumental in developing data-driven insights and decision support tools for accident management and the optimization of paramedic services across the USA.
