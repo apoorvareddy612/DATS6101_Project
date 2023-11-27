@@ -1,0 +1,62 @@
+---
+  title: "US_Accidents_Analysis"
+author: "Team: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Devarsh Apurva Sheth"
+output:
+  html_document:
+  code_folding: show
+number_sections: false
+toc: yes
+toc_depth: 3
+toc_float: yes
+pdf_document:
+  toc: yes
+toc_depth: '3'
+---
+
+```{r init, include=F}
+# The package "ezids" (EZ Intro to Data Science) includes some helper functions we developed for the course. 
+# Some of the frequently used functions are loadPkg(), xkabledply(), xkablesummary(), uzscale(), etc.
+# You will need to install it (once) from GitHub.
+# library(devtools)
+# devtools::install_github("physicsland/ezids")
+# Then load the package in your R session.
+library(ezids)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(tidyverse)
+library(scales)
+library(plotly)
+library(gridExtra)
+library(tidytext)
+library(modelr)
+library(caret)
+library(ROSE)
+library(glmnet)
+library(randomForest)
+library(ggrepel)
+library(patchwork)
+library(readr)
+```
+
+```{r setup, include=FALSE}
+# Some of common RMD options (and the defaults) are: 
+# include=T, eval=T, echo=T, results='hide'/'asis'/'markup',..., collapse=F, warning=T, message=T, error=T, cache=T, fig.width=6, fig.height=4, fig.dim=c(6,4) #inches, fig.align='left'/'center','right', 
+knitr::opts_chunk$set(warning = F, message = F)
+# Can globally set option for number display format.
+options(scientific=T, digits = 3) 
+# options(scipen=9, digits = 3) 
+```
+
+```{r}
+accidents <- read_csv("/Users/bhoomikan/Documents/Sample_Projects_DS/US_Accidents_EDA.csv")
+```
+
+```{r}
+accidents$severity <- as.factor(accidents$Severity)
+```
+
+```{r}
+corr_mat=cor(accidents,method="s")
+corrplot(corr_mat, method = 'color', order = 'alphabet', addCoef.col = "white", number.digits = 2, number.cex = 0.75, col = colorRampPalette(c("darkred","lightblue","midnightblue"))(100))
+```
