@@ -1,0 +1,51 @@
+---
+  title: "US_Accidents_Prediction"
+author: "Team: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Devarsh Apurva Sheth"
+output:
+  html_document:
+  code_folding: show
+number_sections: false
+toc: yes
+toc_depth: 3
+toc_float: yes
+pdf_document:
+  toc: yes
+toc_depth: '3'
+---
+
+```{r init, include=F}
+# The package "ezids" (EZ Intro to Data Science) includes some helper functions we developed for the course. 
+# Some of the frequently used functions are loadPkg(), xkabledply(), xkablesummary(), uzscale(), etc.
+# You will need to install it (once) from GitHub.
+# library(devtools)
+# devtools::install_github("physicsland/ezids")
+# Then load the package in your R session.
+library(ezids)
+library(ggplot2)
+library(caTools)
+library(glmnet)
+```
+
+```{r}
+df = read.csv("C:/Users/DEVARSH SHETH/Downloads/US_Accidents.csv")
+head(df, 5)
+```
+
+
+```{r}
+str(df)
+sum(is.na(df))
+```
+
+```{r}
+set.seed(123)
+```
+
+```{r}
+colnames(df)[colnames(df) == "Response.time"] <- "ResponseTime"
+df <- model.matrix(~ City + Street + SeverityProportion + ResponseTime + Weights - 1, df)
+```
+
+```{r}
+
+```
