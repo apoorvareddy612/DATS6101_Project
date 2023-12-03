@@ -31,7 +31,6 @@ df = read.csv("C:/Users/DEVARSH SHETH/Downloads/US_Accidents.csv")
 head(df, 5)
 ```
 
-
 ```{r}
 str(df)
 sum(is.na(df))
@@ -42,10 +41,15 @@ set.seed(123)
 ```
 
 ```{r}
-colnames(df)[colnames(df) == "Response.time"] <- "ResponseTime"
-df <- model.matrix(~ City + Street + SeverityProportion + ResponseTime + Weights - 1, df)
+indices <- sample(1:nrow(df), size = 0.72 * nrow(df))
+
+# Create train and test datasets
+train_data <- df[indices, ]
+test_data <- df[-indices, ]
 ```
 
-```{r}
 
+```{r}
+model <- glm(New_Amenity ~ ., data = as.data.frame(train_data), family = "binomial")
+summary(model)
 ```
