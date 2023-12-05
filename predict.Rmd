@@ -1,3 +1,19 @@
+---
+title: "US_Accidents_Prediction"
+author: "Team: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Devarsh Apurva Sheth"
+output:
+  html_document:
+    code_folding: show
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r}
 # Load necessary libraries
 library(ggplot2)
 library(dplyr)
@@ -6,7 +22,7 @@ library(randomForest)
 
 # Load the dataset (assuming your dataset is stored in a variable called 'accidents_data')
 # Replace 'your_dataset.csv' with the actual file path or dataset name
-accidents_data <- read.csv('US_accidents_EDA.csv')
+accidents_data <- read.csv('/Users/apoorvareddy/Downloads/Academic/DATS6101/Project/US_accidents_EDA.csv')
 
 # Data Exploration
 summary(accidents_data)
@@ -50,3 +66,5 @@ print(confusion_matrix)
 
 print(typeof(binary_predictions))
 print(typeof(test_data$HighSeverity))
+```
+
