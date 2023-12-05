@@ -25,6 +25,8 @@ library(ggplot2)
 library(caTools)
 library(glmnet)
 library(caret)
+library(pROC)
+library(PRROC)
 ```
 
 ```{r}
@@ -117,8 +119,29 @@ The accuracy is calculated as the sum of correct predictions (diagonal elements 
 **Overfitting:** The model could be overfitting the training data, memorizing the patterns and not generalizing well to new, unseen data.
 
 ```{r}
-print(conf_matrix)
+conf_matrix_df <- as.data.frame(as.table(conf_matrix))
+ggplot(conf_matrix_df, aes(x = Var1, y = predicted_labels, fill = Freq)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") +
+  theme_minimal() +
+  labs(title = "Confusion Matrix Heatmap",
+       x = "Predicted Label",
+       y = "True Label")
+
 ```
+
+## Analysis of Confusion Matrix:
+
+- 2323 instances were correctly predicted as class 0 (true negatives).
+- 1323 instances were correctly predicted as class 1 (true positives).
+- There were 4 instances where the actual class was 0 but were predicted as class 1 (false positives).
+- There were no instances where the actual class was 1 but were predicted as class 0 (false negatives).
+
+```{r}
+roc_curve <- roc(test_data$New_Amenity, predicted_probs)
+plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2)
+```
+
 
 ```{r}
 train_data$New_Amenity <- factor(train_data$New_Amenity, levels = c(0, 1))
