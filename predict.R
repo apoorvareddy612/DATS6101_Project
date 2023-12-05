@@ -1,0 +1,52 @@
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(caret)
+library(randomForest)
+
+# Load the dataset (assuming your dataset is stored in a variable called 'accidents_data')
+# Replace 'your_dataset.csv' with the actual file path or dataset name
+accidents_data <- read.csv('US_accidents_EDA.csv')
+
+# Data Exploration
+summary(accidents_data)
+
+# Data Preprocessing
+# Check for missing values
+sum(is.na(accidents_data))
+accidents_data$Weather_Condition <- as.factor(accidents_data$Weather_Condition)
+accidents_data$Wind_Direction <- as.factor(accidents_data$Wind_Direction)
+accidents_data$Sunrise_Sunset <- as.factor(accidents_data$Sunrise_Sunset)
+
+# Create a binary variable indicating high or low severity (you can define a threshold)
+accidents_data$HighSeverity <- ifelse(accidents_data$Severity > 2, 1, 0)
+
+# Split the dataset into training and testing sets
+set.seed(123)
+split_index <- sample(nrow(accidents_data), size = 4000)
+train_data <- accidents_data[split_index, ]
+test_data <- accidents_data[-split_index, ]
+
+# Select relevant features based on your domain knowledge
+selected_features <- c('Temperature.F.', 'Humidity...', 'Pressure.in.', 'Visibility.mi.', 'Wind_Direction')
+colnames(train_data)
+train_data[,selected_features]
+
+# Train a predictive model (using logistic regression in this case)
+model <- glm(HighSeverity ~ ., data = train_data[, c('HighSeverity', selected_features)], family = "binomial")
+
+# Make predictions on the test set
+predictions <- predict(model, newdata = test_data[, selected_features], type = "response")
+
+# Convert probabilities to binary predictions
+binary_predictions <- ifelse(predictions > 0.5, 1, 0)
+
+# Convert actual outcomes to factor with the same levels as binary_predictions
+test_data$HighSeverity <- as.factor(test_data$HighSeverity)
+binary_predictions <- as.factor(binary_predictions)
+# Evaluate the model
+confusion_matrix <- confusionMatrix(binary_predictions, test_data$HighSeverity)
+print(confusion_matrix)
+
+print(typeof(binary_predictions))
+print(typeof(test_data$HighSeverity))
