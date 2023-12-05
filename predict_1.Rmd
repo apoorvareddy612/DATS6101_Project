@@ -13,7 +13,6 @@ output:
     toc_depth: '3'
 ---
 ```{r}
-
 # Load necessary libraries
 library(ggplot2)
 library(dplyr)
@@ -27,6 +26,10 @@ accidents_data <- read.csv('/Users/apoorvareddy/Downloads/Academic/DATS6101/Proj
 # Create a binary variable indicating the presence of an amenity
 accidents_data$Amenity_binary <- ifelse(accidents_data$Amenity == 'False', 0, 1)
 accidents_data$Amenity_binary <- as.factor(accidents_data$Amenity_binary)
+```
+
+
+```{r}
 
 # Split the dataset into training and testing sets
 set.seed(123)
