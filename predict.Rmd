@@ -12,7 +12,6 @@ output:
     toc: yes
     toc_depth: '3'
 ---
-
 ```{r}
 # Load necessary libraries
 library(ggplot2)
@@ -36,7 +35,10 @@ accidents_data$Sunrise_Sunset <- as.factor(accidents_data$Sunrise_Sunset)
 
 # Create a binary variable indicating high or low severity (you can define a threshold)
 accidents_data$HighSeverity <- ifelse(accidents_data$Severity > 2, 1, 0)
+```
 
+
+```{r}
 # Split the dataset into training and testing sets
 set.seed(123)
 split_index <- sample(nrow(accidents_data), size = 4000)
@@ -64,7 +66,5 @@ binary_predictions <- as.factor(binary_predictions)
 confusion_matrix <- confusionMatrix(binary_predictions, test_data$HighSeverity)
 print(confusion_matrix)
 
-print(typeof(binary_predictions))
-print(typeof(test_data$HighSeverity))
 ```
 
