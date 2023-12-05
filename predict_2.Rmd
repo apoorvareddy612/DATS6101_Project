@@ -12,7 +12,6 @@ output:
     toc: yes
     toc_depth: '3'
 ---
-
 ```{r}
 # Load necessary libraries
 library(dplyr)
@@ -27,7 +26,10 @@ accidents_data <- read.csv('/Users/apoorvareddy/Downloads/Academic/DATS6101/Proj
 # Data Preprocessing
 # Convert the 'Start_Time' column to a datetime object
 accidents_data$Start_Time <- as.POSIXct(accidents_data$Start_Time, format="%Y-%m-%d %H:%M:%S")
+```
 
+
+```{r}
 # Extract day of the week and hour of the day
 accidents_data$DayOfWeek <- weekdays(accidents_data$Start_Time)
 accidents_data$HourOfDay <- format(accidents_data$Start_Time, "%H")
