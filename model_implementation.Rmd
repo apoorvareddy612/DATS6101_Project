@@ -1,16 +1,16 @@
 ---
-  title: "US_Accidents_Prediction"
+title: "US_Accidents_Prediction"
 author: "Team: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Devarsh Apurva Sheth"
 output:
   html_document:
-  code_folding: show
-number_sections: false
-toc: yes
-toc_depth: 3
-toc_float: yes
-pdf_document:
-  toc: yes
-toc_depth: '3'
+    code_folding: show
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
 ---
 
 ```{r init, include=F}
@@ -24,6 +24,7 @@ library(ezids)
 library(ggplot2)
 library(caTools)
 library(glmnet)
+library(caret)
 ```
 
 ```{r}
@@ -40,6 +41,9 @@ sum(is.na(df))
 set.seed(123)
 ```
 
+## Train-Test Split Explanation
+
+The provided R code performs a train-test split on a dataframe (`df`). This is a common practice in machine learning to assess the performance of a model on unseen data.
 ```{r}
 indices <- sample(1:nrow(df), size = 0.72 * nrow(df))
 
@@ -49,15 +53,35 @@ test_data <- df[-indices, ]
 ```
 
 ```{r}
-head(test_data, 5)
-```
-
-```{r}
 train_data <- train_data[, !(colnames(train_data) %in% c('City', 'Street'))]
 model_formula <- New_Amenity ~ .
 model <- glm(model_formula, data = train_data, family = "binomial")
 summary(model)
 ```
+## Logit Equation:
+
+\[
+\text{{logit}}(p) = -4.784 \times 10^3 - 4.46 \times 10^8 \times \text{{Severity\_Proportion}} - 5.626 \times 10^8 \times \text{{Amenity}} - 38.94 \times \text{{Response\_time}} + 5.626 \times 10^8 \times \text{{Weights}}
+\]
+
+
+## Interpretation of Logistic Regression Coefficients
+
+- **Intercept (-4.784e+03):** The intercept represents the log-odds of the response variable being 1 when all predictor variables are zero. A large negative value suggests a low probability of the response variable being 1 in the absence of other factors.
+
+- **Severity_Proportion (-4.46e+08):** For every one-unit increase in Severity_Proportion, the log-odds of the response variable being 1 decrease by \(4.46 \times 10^8\). The negative sign suggests that higher Severity_Proportion is associated with a lower probability of the event.
+
+- **Amenity (-5.626e+08):** Similarly, for every one-unit increase in Amenity, the log-odds of the response variable being 1 decrease by \(5.626 \times 10^8\). The negative sign suggests that higher Amenity is associated with a lower probability of the event.
+
+- **Response_time (-38.94):** For every one-unit increase in Response_time, the log-odds of the response variable being 1 decrease by 38.94. The negative sign suggests that a longer Response_time is associated with a lower probability of the event.
+
+- **Weights (5.626e+08):** For every one-unit increase in Weights, the log-odds of the response variable being 1 increase by \(5.626 \times 10^8\). The positive sign suggests that higher Weights are associated with a higher probability of the event.
+
+**Overall Interpretation:**
+- The significant coefficients indicate that Severity_Proportion, Amenity, Response_time, and Weights are statistically associated with the response variable.
+- Higher values of Severity_Proportion and Amenity are associated with a lower probability of the event.
+- Longer Response_time is associated with a lower probability of the event.
+- Higher Weights are associated with a higher probability of the event.
 
 ```{r}
 test_data <- test_data[, !(colnames(test_data) %in% c('City', 'Street'))]
@@ -73,6 +97,51 @@ conf_matrix <- table(test_data$New_Amenity, predicted_labels)
 accuracy <- sum(diag(conf_matrix))/sum(conf_matrix)
 print(paste("Accuracy:", accuracy))
 ```
+
+- **Predicting Probabilities:**
+The predict function is used to obtain predicted probabilities from the trained model (model) on the test dataset (test_data).
+
+- **Converting Probabilities to Binary Labels:**
+The predicted probabilities are then converted into binary labels using a threshold of 0.0001. If the predicted probability is greater than 0.0001, the label is set to 1; otherwise, it is set to 0.
+
+- **Creating Confusion Matrix:**
+A confusion matrix (conf_matrix) is created by comparing the predicted binary labels with the true labels from the test dataset (test_data$New_Amenity).
+
+- **Calculating Accuracy:**
+The accuracy of the model is calculated by summing the diagonal elements (correct predictions) of the confusion matrix and dividing it by the total number of predictions.
+
+The accuracy is calculated as the sum of correct predictions (diagonal elements of the confusion matrix) divided by the total number of predictions. If the accuracy is printed as "1," it suggests that all predictions made by the model on the test dataset were correct. This could be due to a few reasons:
+
+**Perfect Model:** The model might be performing exceptionally well on the given dataset, correctly classifying all instances.
+
+**Overfitting:** The model could be overfitting the training data, memorizing the patterns and not generalizing well to new, unseen data.
+
 ```{r}
+print(conf_matrix)
+```
+
+```{r}
+train_data$New_Amenity <- factor(train_data$New_Amenity, levels = c(0, 1))
+knn_model <- train(New_Amenity ~ ., data = train_data, method = "knn")
+```
+
+```{r}
+summary(knn_model)
+
+```
+
+```{r}
+levels(train_data$New_Amenity)
+
+# Check levels in test data
+levels(test_data$New_Amenity)
+```
+
+```{r}
+test_data$New_Amenity <- factor(test_data$New_Amenity, levels = levels(train_data$New_Amenity))
+predictions <- predict(knn_model, newdata = test_data)
+
+# Confusion Matrix and Accuracy
+conf_matrix <- confusionMatrix(predictions, test_data$New_Amenity)
 print(conf_matrix)
 ```
