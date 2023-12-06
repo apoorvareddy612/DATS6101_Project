@@ -1,0 +1,187 @@
+---
+title: "US_Accidents_Prediction"
+author: "Team: Bhoomika Nanjaraja, Khush Shah, Apoorva Reddy Bagepalli, Devarsh Apurva Sheth"
+output:
+  html_document:
+    code_folding: show
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r init, include=F}
+# The package "ezids" (EZ Intro to Data Science) includes some helper functions we developed for the course. 
+# Some of the frequently used functions are loadPkg(), xkabledply(), xkablesummary(), uzscale(), etc.
+# You will need to install it (once) from GitHub.
+# library(devtools)
+# devtools::install_github("physicsland/ezids")
+# Then load the package in your R session.
+library(ezids)
+library(ggplot2)
+library(caTools)
+library(glmnet)
+library(caret)
+library(pROC)
+library(PRROC)
+```
+
+```{r}
+df = read.csv('C:/Users/nupur/computer/Desktop/Intro_DS/DATS6101_Project/US_Accidents.csv')
+head(df, 5)
+```
+
+```{r}
+str(df)
+sum(is.na(df))
+```
+
+```{r}
+set.seed(123)
+```
+
+## Train-Test Split Explanation
+
+The provided R code performs a train-test split on a dataframe (`df`). This is a common practice in machine learning to assess the performance of a model on unseen data.
+```{r}
+indices <- sample(1:nrow(df), size = 0.72 * nrow(df))
+
+# Create train and test datasets
+train_data <- df[indices, ]
+test_data <- df[-indices, ]
+```
+
+```{r}
+train_data <- train_data[, !(colnames(train_data) %in% c('City', 'Street'))]
+model_formula <- New.Amenity ~ .
+model <- glm(model_formula, train_data, family = "binomial")
+summary(model)
+```
+## Logit Equation:
+
+\[
+\text{{logit}}(p) = -4.784 \times 10^3 - 4.46 \times 10^8 \times \text{{Severity\_Proportion}} - 5.626 \times 10^8 \times \text{{Amenity}} - 38.94 \times \text{{Response\_time}} + 5.626 \times 10^8 \times \text{{Weights}}
+\]
+
+
+## Interpretation of Logistic Regression Coefficients
+
+- **Intercept (-4.784e+03):** The intercept represents the log-odds of the response variable being 1 when all predictor variables are zero. A large negative value suggests a low probability of the response variable being 1 in the absence of other factors.
+
+- **Severity_Proportion (-4.46e+08):** For every one-unit increase in Severity_Proportion, the log-odds of the response variable being 1 decrease by \(4.46 \times 10^8\). The negative sign suggests that higher Severity_Proportion is associated with a lower probability of the event.
+
+- **Amenity (-5.626e+08):** Similarly, for every one-unit increase in Amenity, the log-odds of the response variable being 1 decrease by \(5.626 \times 10^8\). The negative sign suggests that higher Amenity is associated with a lower probability of the event.
+
+- **Response_time (-38.94):** For every one-unit increase in Response_time, the log-odds of the response variable being 1 decrease by 38.94. The negative sign suggests that a longer Response_time is associated with a lower probability of the event.
+
+- **Weights (5.626e+08):** For every one-unit increase in Weights, the log-odds of the response variable being 1 increase by \(5.626 \times 10^8\). The positive sign suggests that higher Weights are associated with a higher probability of the event.
+
+**Overall Interpretation:**
+- The significant coefficients indicate that Severity_Proportion, Amenity, Response_time, and Weights are statistically associated with the response variable.
+- Higher values of Severity_Proportion and Amenity are associated with a lower probability of the event.
+- Longer Response_time is associated with a lower probability of the event.
+- Higher Weights are associated with a higher probability of the event.
+
+```{r}
+test_data <- test_data[, !(colnames(test_data) %in% c('City', 'Street'))]
+head(test_data,5)
+```
+
+```{r}
+predicted_probs <- predict(model, newdata = test_data, type = "response")
+predicted_labels <- ifelse(predicted_probs > 0.0001, 1, 0)
+
+# Confusion Matrix and Accuracy
+conf_matrix <- table(test_data$New.Amenity, predicted_labels)
+accuracy <- sum(diag(conf_matrix))/sum(conf_matrix)
+print(paste("Accuracy:", accuracy))
+```
+
+- **Predicting Probabilities:**
+The predict function is used to obtain predicted probabilities from the trained model (model) on the test dataset (test_data).
+
+- **Converting Probabilities to Binary Labels:**
+The predicted probabilities are then converted into binary labels using a threshold of 0.0001. If the predicted probability is greater than 0.0001, the label is set to 1; otherwise, it is set to 0.
+
+- **Creating Confusion Matrix:**
+A confusion matrix (conf_matrix) is created by comparing the predicted binary labels with the true labels from the test dataset (test_data$New_Amenity).
+
+- **Calculating Accuracy:**
+The accuracy of the model is calculated by summing the diagonal elements (correct predictions) of the confusion matrix and dividing it by the total number of predictions.
+
+The accuracy is calculated as the sum of correct predictions (diagonal elements of the confusion matrix) divided by the total number of predictions. If the accuracy is printed as "1," it suggests that all predictions made by the model on the test dataset were correct. This could be due to a few reasons:
+
+**Perfect Model:** The model might be performing exceptionally well on the given dataset, correctly classifying all instances.
+
+**Overfitting:** The model could be overfitting the training data, memorizing the patterns and not generalizing well to new, unseen data.
+
+```{r}
+conf_matrix_df <- as.data.frame(as.table(conf_matrix))
+ggplot(conf_matrix_df, aes(x = Var1, y = predicted_labels, fill = Freq)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") +
+  theme_minimal() +
+  labs(title = "Confusion Matrix Heatmap",
+       x = "Predicted Label",
+       y = "True Label")
+
+```
+
+## Analysis of Confusion Matrix:
+
+- 2323 instances were correctly predicted as class 0 (true negatives).
+- 1323 instances were correctly predicted as class 1 (true positives).
+- There were 4 instances where the actual class was 0 but were predicted as class 1 (false positives).
+- There were no instances where the actual class was 1 but were predicted as class 0 (false negatives).
+
+```{r}
+roc_curve <- roc(test_data$New.Amenity, predicted_probs)
+plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2)
+```
+
+
+```{r}
+head(train_data)
+train_data$New.Amenity <- factor(train_data$New.Amenity, levels = c(0, 1))
+knn_model <- train(New.Amenity ~ ., data = train_data, method = "knn")
+```
+
+```{r}
+summary(knn_model)
+
+```
+
+```{r}
+
+
+# Check levels in test data
+levels(test_data$New.Amenity)
+```
+
+```{r}
+levels(train_data$New.Amenity)
+```
+
+
+```{r}
+test_data$New.Amenity <- factor(test_data$New.Amenity, levels = c(0, 1))
+predictions <- predict(knn_model, newdata = test_data)
+```
+```{r}
+head(test_data)
+```
+
+```{r}
+# Confusion Matrix and Accuracy
+conf_matrix <- confusionMatrix(predictions, test_data$New.Amenity)
+print(conf_matrix)
+```
+
+```{r}
+length(predictions)
+length(test_data$New.Amenity)
+```
+
