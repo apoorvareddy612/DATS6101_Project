@@ -67,7 +67,7 @@ dataframe_cleaned$City <- as.factor(dataframe_cleaned$City)
 names(dataframe_cleaned)[names(dataframe_cleaned) == "New Amenity"] <- "New_Amenity"
 dataframe_cleaned$Amenity<- as.factor(dataframe_cleaned$Amenity)
 dataframe_cleaned$New_Amenity<- as.factor(dataframe_cleaned$New_Amenity)
-dataframe_cleaned$`Response time`<- as.factor(dataframe_cleaned$`Response time`)
+#dataframe_cleaned$`Response time`<- as.factor(dataframe_cleaned$`Response time`)
 dataframe_cleaned$CityAbr <- substr(dataframe_cleaned$City, start = 1, stop = 3)
 ```
 ```{r}
