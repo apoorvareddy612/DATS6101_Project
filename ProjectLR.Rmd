@@ -72,6 +72,7 @@ dataframe_cleaned$CityAbr <- substr(dataframe_cleaned$City, start = 1, stop = 3)
 ```
 ```{r}
 str(dataframe_cleaned)
+summary(dataframe_cleaned)
 ```
 ```{r}
 ggplot(dataframe_cleaned, aes(x = CityAbr,fill = Amenity)) + geom_bar(position = "dodge")
