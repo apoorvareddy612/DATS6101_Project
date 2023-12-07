@@ -29,6 +29,8 @@ library(pROC)
 library(PRROC)
 ```
 
+EDA
+
 ```{r}
 df = read.csv('C:/Users/nupur/computer/Desktop/Intro_DS/DATS6101_Project/US_Accidents.csv')
 head(df, 5)
@@ -39,6 +41,47 @@ str(df)
 sum(is.na(df))
 ```
 
+```{r}
+# Load the dataset (assuming your dataset is stored in a variable called 'accidents_data')
+accidents_data <- read.csv('US_accidents.csv')
+
+# Identify streets with the highest severity proportions
+highest_severity_streets <- accidents_data %>%
+  arrange(desc(SeverityProportion)) %>%
+  slice(1)
+
+# Identify streets with the lowest severity proportions
+lowest_severity_streets <- accidents_data %>%
+  arrange(SeverityProportion) %>%
+  slice(1)
+
+# Display the results
+cat("Streets with the Highest Severity Proportions:\n")
+print(highest_severity_streets[, c("City", "Street", "SeverityProportion")])
+
+cat("\nStreets with the Lowest Severity Proportions:\n")
+print(lowest_severity_streets[, c("City", "Street", "SeverityProportion")])
+```
+
+```{r}
+accidents_data$Weighted_Response_Time <- accidents_data$Weights
+
+# Alternatively, plot a boxplot to visualize the distribution
+ggplot(accidents_data, aes(x = 1, y = Weighted_Response_Time)) +
+  geom_boxplot(fill = "green", color = "black", alpha = 0.7) +
+  labs(title = "Boxplot of Weighted Response Times",
+       x = "",
+       y = "Weighted Response Time") +
+  coord_cartesian(ylim = c(0, 0.0001))
+
+```
+
+
+
+
+
+
+Modelling
 ```{r}
 set.seed(123)
 ```
@@ -183,5 +226,114 @@ print(conf_matrix)
 ```{r}
 length(predictions)
 length(test_data$New.Amenity)
+```
+
+```{r}
+# Data Exploration
+summary(accidents_data)
+
+# Data Preprocessing
+# Check for missing values
+sum(is.na(accidents_data))
+accidents_data$Weather_Condition <- as.factor(accidents_data$Weather_Condition)
+accidents_data$Wind_Direction <- as.factor(accidents_data$Wind_Direction)
+accidents_data$Sunrise_Sunset <- as.factor(accidents_data$Sunrise_Sunset)
+
+# Create a binary variable indicating high or low severity (you can define a threshold)
+accidents_data$HighSeverity <- ifelse(accidents_data$Severity > 2, 1, 0)
+```
+
+```{r}
+set.seed(123)
+split_index <- sample(nrow(accidents_data), size = 4000)
+train_data <- accidents_data[split_index, ]
+test_data <- accidents_data[-split_index, ]
+
+# Select relevant features based on your domain knowledge
+selected_features <- c('Temperature.F.', 'Humidity...', 'Pressure.in.', 'Visibility.mi.', 'Wind_Direction')
+colnames(train_data)
+train_data[,selected_features]
+
+# Train a predictive model (using logistic regression in this case)
+model <- glm(HighSeverity ~ ., data = train_data[, c('HighSeverity', selected_features)], family = "binomial")
+
+# Make predictions on the test set
+predictions <- predict(model, newdata = test_data[, selected_features], type = "response")
+
+# Convert probabilities to binary predictions
+binary_predictions <- ifelse(predictions > 0.5, 1, 0)
+
+# Convert actual outcomes to factor with the same levels as binary_predictions
+test_data$HighSeverity <- as.factor(test_data$HighSeverity)
+binary_predictions <- as.factor(binary_predictions)
+```
+
+```{r}
+# Evaluate the model
+confusion_matrix <- confusionMatrix(binary_predictions, test_data$HighSeverity)
+print(confusion_matrix)
+```
+
+```{r}
+# Create a binary variable indicating the presence of an amenity
+accidents_data$Amenity_binary <- ifelse(accidents_data$Amenity == 'False', 0, 1)
+accidents_data$Amenity_binary <- as.factor(accidents_data$Amenity_binary)
+split_index <- sample(nrow(accidents_data), size = 4000)
+train_data <- accidents_data[split_index, ]
+test_data <- accidents_data[-split_index, ]
+
+# Train a predictive model (using logistic regression in this case)
+selected_features <- c('Severity', 'Pressure.in.', 'Visibility.mi.', 'Wind_Direction','Temperature.F.')
+model <- glm(Amenity_binary ~ ., data = train_data[, c('Amenity_binary', selected_features)], family = "binomial",maxit = 1000)
+
+# Make predictions on the test set
+predictions <- predict(model, newdata = test_data[, selected_features], type = "response")
+
+# Convert probabilities to binary predictions
+binary_predictions <- ifelse(predictions > 0.5, 1, 0)
+binary_predictions <- as.factor(binary_predictions)
+
+# Evaluate the model
+binary_predictions <- as.factor(binary_predictions)
+confusion_matrix <- confusionMatrix(binary_predictions, test_data$Amenity_binary)
+print(confusion_matrix)
+```
+
+```{r}
+# Data Preprocessing
+# Convert the 'Start_Time' column to a datetime object
+accidents_data$Start_Time <- as.POSIXct(accidents_data$Start_Time, format="%Y-%m-%d %H:%M:%S")
+accidents_data$DayOfWeek <- weekdays(accidents_data$Start_Time)
+accidents_data$HourOfDay <- format(accidents_data$Start_Time, "%H")
+
+# Convert day of the week to a factor
+accidents_data$DayOfWeek <- factor(accidents_data$DayOfWeek, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+
+# Convert hour of the day to numeric
+accidents_data$HourOfDay <- as.numeric(accidents_data$HourOfDay)
+
+# Create a binary variable indicating high or low chance of accidents (you can define a threshold)
+accidents_data$HighChance <- ifelse(accidents_data$Severity > 2, 1, 0)
+
+# Split the dataset into training and testing sets
+set.seed(123)
+split_index <- sample(nrow(accidents_data), size = 4000)
+train_data <- accidents_data[split_index, ]
+test_data <- accidents_data[-split_index, ]
+
+# Train a predictive model (using logistic regression in this case)
+model <- glm(HighChance ~ DayOfWeek + HourOfDay, data = train_data, family = "binomial")
+
+# Make predictions on the test set
+predictions <- predict(model, newdata = test_data, type = "response")
+
+# Convert probabilities to binary predictions
+binary_predictions <- ifelse(predictions > 0.5, 1, 0)
+
+# Evaluate the model
+binary_predictions <- as.factor(binary_predictions)
+test_data$HighChance <- as.factor(test_data$HighChance)
+confusion_matrix <- confusionMatrix(binary_predictions, test_data$HighChance)
+print(confusion_matrix)
 ```
 
