@@ -199,7 +199,7 @@ print(accuracy)
 model <- glm(New_Amenity ~ Weights_mod, data = dataframe_cleaned, family = binomial)
 summary(model)
 predicted_probabilities <- predict(model, type = "response")
-predicted_outcomes <- ifelse(predicted_probabilities > 0.5, 1, 0)
+predicted_outcomes <- ifelse(predicted_probabilities > 0.001, 1, 0)
 actual_outcomes <- dataframe_cleaned$Amenity
 accuracy <- mean(predicted_outcomes == actual_outcomes)
 print(accuracy)
