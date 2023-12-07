@@ -27,6 +27,21 @@ library(glmnet)
 library(caret)
 library(pROC)
 library(PRROC)
+library(dplyr)
+library(lubridate)
+library(tidyverse)
+library(scales)
+library(plotly)
+library(gridExtra)
+library(tidytext)
+library(modelr)
+library(caret)
+library(ROSE)
+library(randomForest)
+library(ggrepel)
+library(patchwork)
+library(readr)
+library(corrplot)
 ```
 
 EDA
@@ -76,9 +91,128 @@ ggplot(accidents_data, aes(x = 1, y = Weighted_Response_Time)) +
 
 ```
 
+```{r}
+dataframe_cleaned <- na.omit(df)
+str(dataframe_cleaned)
 
+dataframe_cleaned$City <- as.factor(dataframe_cleaned$City)
+names(dataframe_cleaned)[names(dataframe_cleaned) == "New Amenity"] <- "New_Amenity"
+dataframe_cleaned$Amenity<- as.factor(dataframe_cleaned$Amenity)
+dataframe_cleaned$New_Amenity<- as.factor(dataframe_cleaned$New_Amenity)
+#dataframe_cleaned$`Response time`<- as.factor(dataframe_cleaned$`Response time`)
+dataframe_cleaned$CityAbr <- substr(dataframe_cleaned$City, start = 1, stop = 3)
+```
 
+```{r}
+ggplot(dataframe_cleaned, aes(x = CityAbr,fill = New_Amenity)) + geom_bar(position = "dodge")
+```
 
+```{r}
+ggplot(dataframe_cleaned, aes(x = CityAbr,fill = Amenity)) + geom_bar(position = "dodge")
+```
+
+```{r}
+category_counts <- table(dataframe_cleaned$Amenity)
+barplot(category_counts, 
+        main = "Bar Plot of Categories", 
+        xlab = "Categories", 
+        ylab = "Frequency",
+        col = "blue")
+```
+
+```{r}
+category_counts <- table(dataframe_cleaned$New_Amenity)
+barplot(category_counts, 
+        main = "Bar Plot of Categories", 
+        xlab = "Categories", 
+        ylab = "Frequency",
+        col = "blue")
+```
+
+```{r}
+ggplot(dataframe_cleaned, aes(x = `Response time`,fill = Amenity)) + geom_bar(position = "dodge")
+```
+
+```{r}
+ggplot(dataframe_cleaned, aes(x = `Response time`,fill = New_Amenity)) + geom_bar(position = "dodge")
+```
+
+```{r}
+dataframe_cleaned$Sevprop_mod <- dataframe_cleaned$SeverityProportion * 1000000
+dataframe_cleaned$Weights_mod <- dataframe_cleaned$Weights * 10000
+unique_values1 <- unique(dataframe_cleaned$Sevprop_mod)
+print(unique_values1)
+unique_values2 <- unique(dataframe_cleaned$Weights_mod)
+print(unique_values2)
+```
+```{r}
+ggplot(dataframe_cleaned, aes(x = Sevprop_mod)) + 
+     geom_boxplot() +
+  labs(title = "Boxplot", 
+       x = "SeverityProp", 
+        y = "Count")+scale_x_continuous(limits = c(1, 10))
+```
+```{r}
+ggplot(dataframe_cleaned, aes(x = Weights_mod)) + 
+     geom_boxplot() +
+  labs(title = "Boxplot", 
+       x = "Weight", 
+        y = "Count")+scale_x_continuous(limits = c(1, 10))
+```
+```{r}
+df_sub <- subset(dataframe_cleaned,dataframe_cleaned$Amenity==0)
+ggplot(df_sub, aes(x = Sevprop_mod, y = Weights_mod)) +
+    geom_point(color = "blue") +  # Add points
+    ggtitle("Scatter Plot of MPG vs. Weight") +
+    xlab("Sev(Prop)") +
+    ylab("Weights")
+```
+
+```{r}
+df_sub <- subset(dataframe_cleaned,dataframe_cleaned$New_Amenity==0)
+ggplot(df_sub, aes(x = Sevprop_mod, y = Weights_mod)) +
+    geom_point(color = "blue") +  # Add points
+    ggtitle("Scatter Plot of MPG vs. Weight") +
+    xlab("Sev(Prop)") +
+    ylab("Weights")
+```
+
+```{r}
+df_subnew <- subset(dataframe_cleaned,dataframe_cleaned$Amenity==1)
+ggplot(df_subnew, aes(x = Sevprop_mod, y = Weights_mod)) +
+    geom_point(color = "blue") +  # Add points
+    ggtitle("Scatter Plot of MPG vs. Weight") +
+    xlab("Sev(Prop)") +
+    ylab("Weights")
+```
+```{r}
+df_subnew <- subset(dataframe_cleaned,dataframe_cleaned$New_Amenity==1)
+ggplot(df_subnew, aes(x = Sevprop_mod, y = Weights_mod)) +
+    geom_point(color = "blue") +  # Add points
+    ggtitle("Scatter Plot of MPG vs. Weight") +
+    xlab("Sev(Prop)") +
+    ylab("Weights")
+```
+```{r}
+ggplot(dataframe_cleaned, aes(x = Sevprop_mod, y = Weights_mod,color = New_Amenity)) +
+    geom_point() +  
+    ggtitle("Scatter Plot with Hue") +
+    xlab("Sev(Prop)") +
+    ylab("Weights") 
+```
+```{r}
+ggplot(dataframe_cleaned, aes(x = Sevprop_mod, y = Weights_mod,color = Amenity)) +
+    geom_point() +  
+    ggtitle("Scatter Plot with Hue") +
+    xlab("Sev(Prop)") +
+    ylab("Weights") 
+```
+
+```{r}
+numeric_data <- dataframe_cleaned[, sapply(dataframe_cleaned, is.numeric)]
+cor_matrix <- cor(numeric_data)
+corrplot(cor_matrix, method = "number")
+```
 
 
 Modelling
@@ -335,5 +469,24 @@ binary_predictions <- as.factor(binary_predictions)
 test_data$HighChance <- as.factor(test_data$HighChance)
 confusion_matrix <- confusionMatrix(binary_predictions, test_data$HighChance)
 print(confusion_matrix)
+```
+
+```{r}
+model <- glm(Amenity ~ Sevprop_mod + `Response time` , data = dataframe_cleaned, family = binomial)
+summary(model)
+predicted_probabilities <- predict(model, type = "response")
+predicted_outcomes <- ifelse(predicted_probabilities > 0.5, 1, 0)
+actual_outcomes <- dataframe_cleaned$Amenity
+accuracy <- mean(predicted_outcomes == actual_outcomes)
+print(accuracy)
+```
+```{r}
+model <- glm(New_Amenity ~ Weights_mod, data = dataframe_cleaned, family = binomial)
+summary(model)
+predicted_probabilities <- predict(model, type = "response")
+predicted_outcomes <- ifelse(predicted_probabilities > 0.001, 1, 0)
+actual_outcomes <- dataframe_cleaned$Amenity
+accuracy <- mean(predicted_outcomes == actual_outcomes)
+print(accuracy)
 ```
 
