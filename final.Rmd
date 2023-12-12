@@ -435,8 +435,12 @@ print(confusion_matrix)
 ```
 
 
-#Apoorva's
+
 ```{r}
+accidents_data <- read.csv('/Users/apoorvareddy/Downloads/Academic/DATS6101/Project/US_accidents_EDA.csv')
+
+# Data Exploration
+summary(accidents_data)
 # Data Preprocessing
 # Check for missing values
 sum(is.na(accidents_data))
