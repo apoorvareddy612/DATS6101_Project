@@ -44,8 +44,23 @@ library(readr)
 library(corrplot)
 ```
 
-EDA
+#Introduction
+In response to the pressing issue of road safety in the United States, the project "Navigating Road Safety: Insights & Predictions on US Accidents (2016-2023)" has evolved its focus from predicting the severity of accidents to a novel proposal centered on forecasting potential locations for the introduction of new amenities. Acknowledging the staggering annual occurrence of over 6 million passenger car accidents, the project adopts a comprehensive approach, dissecting the intricate interplay of environmental and man-made factors contributing to these incidents. By analyzing years of data, the study aims to decode patterns and predictors that go beyond quantifying incidents, emphasizing the imperative of understanding multifaceted causes. The proposed features include city, street, severity proportion, existing amenities, response time, and a calculated weight based on severity proportion multiplied by response time added to the amenity factor. This innovative model aspires not only to identify potential locations for new amenities but also to pioneer strategies for mitigating risks and enhancing passenger safety, thereby catalyzing transformative changes in road safety measures and reducing casualties. The overarching objective is a testament to the belief that preventing accidents is a significant stride towards preserving human life and improving the quality of road travel for all.\
 
+# Data Description
+
+
+**Feature Selection**
+
+# SMART Questions
+
+1. Is there a notable contrast in the severity of accidents across various cities and streets?\
+2. How does the response time differ among different cities?\
+3. In terms of amenities, how does the comparison between existing and new amenities vary across cities?\
+
+# Exploratory Data Analysis
+
+Reading the US Accidents Related data from CSV File.
 ```{r}
 df = read.csv('C:/Users/nupur/computer/Desktop/Intro_DS/DATS6101_Project/US_Accidents.csv')
 head(df, 5)
@@ -56,17 +71,39 @@ str(df)
 sum(is.na(df))
 ```
 
+Boxplot of distribution of the Weighted value of Severity Proportion, Response Time and Old Amentiy
+```{r}
+df$Weighted_Response_Time <- df$Weights
+
+# Alternatively, plot a boxplot to visualize the distribution
+ggplot(df, aes(x = 1, y = Weighted_Response_Time)) +
+  geom_boxplot(fill = "green", color = "black", alpha = 0.7) +
+  labs(title = "Boxplot of Weighted Response Times",
+       x = "",
+       y = "Weighted Response Time") +
+  coord_cartesian(ylim = c(0, 0.0001))
+
+```
+The Weighted value are generally fast, with a median of only 7.5e-05 seconds.\
+
+The Weighted value are somewhat variable, with an IQR of 2.5e-05 seconds.\
+
+There are a few outliers, but the overall variability of the Weighted value is relatively low.\
+
+The Weighted value is 9.0e-05 seconds, which is slightly higher than the median. This suggests that the more important value are generally slower than the less important values.\
+
+
+Highest and Lowest Severity in the given dataset
 ```{r}
 # Load the dataset (assuming your dataset is stored in a variable called 'accidents_data')
-accidents_data <- read.csv('US_accidents.csv')
 
 # Identify streets with the highest severity proportions
-highest_severity_streets <- accidents_data %>%
+highest_severity_streets <- df %>%
   arrange(desc(SeverityProportion)) %>%
   slice(1)
 
 # Identify streets with the lowest severity proportions
-lowest_severity_streets <- accidents_data %>%
+lowest_severity_streets <- df %>%
   arrange(SeverityProportion) %>%
   slice(1)
 
@@ -77,19 +114,8 @@ print(highest_severity_streets[, c("City", "Street", "SeverityProportion")])
 cat("\nStreets with the Lowest Severity Proportions:\n")
 print(lowest_severity_streets[, c("City", "Street", "SeverityProportion")])
 ```
+The table shows that Houston has the highest severity, with a value of 0.000750021. Atlanta has the lowest severity, with a value of 1.75e-07.\
 
-```{r}
-accidents_data$Weighted_Response_Time <- accidents_data$Weights
-
-# Alternatively, plot a boxplot to visualize the distribution
-ggplot(accidents_data, aes(x = 1, y = Weighted_Response_Time)) +
-  geom_boxplot(fill = "green", color = "black", alpha = 0.7) +
-  labs(title = "Boxplot of Weighted Response Times",
-       x = "",
-       y = "Weighted Response Time") +
-  coord_cartesian(ylim = c(0, 0.0001))
-
-```
 
 ```{r}
 dataframe_cleaned <- na.omit(df)
@@ -408,68 +434,47 @@ confusion_matrix <- confusionMatrix(binary_predictions, test_data$HighSeverity)
 print(confusion_matrix)
 ```
 
-```{r}
-# Create a binary variable indicating the presence of an amenity
-accidents_data$Amenity_binary <- ifelse(accidents_data$Amenity == 'False', 0, 1)
-accidents_data$Amenity_binary <- as.factor(accidents_data$Amenity_binary)
-split_index <- sample(nrow(accidents_data), size = 4000)
-train_data <- accidents_data[split_index, ]
-test_data <- accidents_data[-split_index, ]
 
-# Train a predictive model (using logistic regression in this case)
-selected_features <- c('Severity', 'Pressure.in.', 'Visibility.mi.', 'Wind_Direction','Temperature.F.')
-model <- glm(Amenity_binary ~ ., data = train_data[, c('Amenity_binary', selected_features)], family = "binomial",maxit = 1000)
-
-# Make predictions on the test set
-predictions <- predict(model, newdata = test_data[, selected_features], type = "response")
-
-# Convert probabilities to binary predictions
-binary_predictions <- ifelse(predictions > 0.5, 1, 0)
-binary_predictions <- as.factor(binary_predictions)
-
-# Evaluate the model
-binary_predictions <- as.factor(binary_predictions)
-confusion_matrix <- confusionMatrix(binary_predictions, test_data$Amenity_binary)
-print(confusion_matrix)
-```
-
+#Apoorva's
 ```{r}
 # Data Preprocessing
-# Convert the 'Start_Time' column to a datetime object
-accidents_data$Start_Time <- as.POSIXct(accidents_data$Start_Time, format="%Y-%m-%d %H:%M:%S")
-accidents_data$DayOfWeek <- weekdays(accidents_data$Start_Time)
-accidents_data$HourOfDay <- format(accidents_data$Start_Time, "%H")
+# Check for missing values
+sum(is.na(accidents_data))
+accidents_data$Weather_Condition <- as.factor(accidents_data$Weather_Condition)
+accidents_data$Wind_Direction <- as.factor(accidents_data$Wind_Direction)
+accidents_data$Sunrise_Sunset <- as.factor(accidents_data$Sunrise_Sunset)
 
-# Convert day of the week to a factor
-accidents_data$DayOfWeek <- factor(accidents_data$DayOfWeek, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
-
-# Convert hour of the day to numeric
-accidents_data$HourOfDay <- as.numeric(accidents_data$HourOfDay)
-
-# Create a binary variable indicating high or low chance of accidents (you can define a threshold)
-accidents_data$HighChance <- ifelse(accidents_data$Severity > 2, 1, 0)
-
+# Create a binary variable indicating high or low severity (you can define a threshold)
+accidents_data$HighSeverity <- ifelse(accidents_data$Severity > 2, 1, 0)
 # Split the dataset into training and testing sets
 set.seed(123)
 split_index <- sample(nrow(accidents_data), size = 4000)
 train_data <- accidents_data[split_index, ]
 test_data <- accidents_data[-split_index, ]
 
+# Select relevant features based on your domain knowledge
+selected_features <- c('Temperature.F.', 'Humidity...', 'Pressure.in.', 'Visibility.mi.', 'Wind_Direction')
+colnames(train_data)
+train_data[,selected_features]
+
 # Train a predictive model (using logistic regression in this case)
-model <- glm(HighChance ~ DayOfWeek + HourOfDay, data = train_data, family = "binomial")
+model <- glm(HighSeverity ~ ., data = train_data[, c('HighSeverity', selected_features)], family = "binomial")
 
 # Make predictions on the test set
-predictions <- predict(model, newdata = test_data, type = "response")
+predictions <- predict(model, newdata = test_data[, selected_features], type = "response")
 
 # Convert probabilities to binary predictions
 binary_predictions <- ifelse(predictions > 0.5, 1, 0)
 
-# Evaluate the model
+# Convert actual outcomes to factor with the same levels as binary_predictions
+test_data$HighSeverity <- as.factor(test_data$HighSeverity)
 binary_predictions <- as.factor(binary_predictions)
-test_data$HighChance <- as.factor(test_data$HighChance)
-confusion_matrix <- confusionMatrix(binary_predictions, test_data$HighChance)
+# Evaluate the model
+confusion_matrix <- confusionMatrix(binary_predictions, test_data$HighSeverity)
 print(confusion_matrix)
 ```
+In the data preprocessing stage, missing values were checked and categorical variables were converted into factors. A binary variable, HighSeverity, denoting accidents with severity greater than 2, was created. The dataset was then split into training and testing sets, and relevant features such as temperature, humidity, pressure, visibility, and wind direction were selected based on domain knowledge. A logistic regression model was trained using these features, and predictions on the test set were made, with probabilities converted to binary outcomes using a 0.5 threshold. The model's performance evaluation revealed an accuracy of 81.35%, with a 95% confidence interval between 81.32% and 81.38%. Comparison to the No Information Rate yielded a p-value of 0.5141, indicating no significant difference. The Kappa statistic was minimal at 1e-04, suggesting limited agreement beyond chance. Mcnemar's test, however, indicated a significant difference in performance between predicted and actual outcomes with a highly significant p-value of <2e-16.\
+
 
 ```{r}
 model <- glm(Amenity ~ Sevprop_mod + `Response time` , data = dataframe_cleaned, family = binomial)
