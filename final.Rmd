@@ -116,7 +116,7 @@ print(lowest_severity_streets[, c("City", "Street", "SeverityProportion")])
 ```
 The table shows that Houston has the highest severity, with a value of 0.000750021. Atlanta has the lowest severity, with a value of 1.75e-07.\
 
-
+Converting the category columns into factor columns
 ```{r}
 dataframe_cleaned <- na.omit(df)
 str(dataframe_cleaned)
@@ -129,14 +129,19 @@ dataframe_cleaned$New_Amenity<- as.factor(dataframe_cleaned$New_Amenity)
 dataframe_cleaned$CityAbr <- substr(dataframe_cleaned$City, start = 1, stop = 3)
 ```
 
+Distribution of New_Amenity categories across different cities.
 ```{r}
 ggplot(dataframe_cleaned, aes(x = CityAbr,fill = New_Amenity)) + geom_bar(position = "dodge")
 ```
+The provided visualization suggests that the proportion of absent amenities across cities is higher than the proportion of present amenities, but it also shows that there is now a more balanced distribution between the two categories of the target variable.
 
+Distribution of Amenity categories across different cities.
 ```{r}
 ggplot(dataframe_cleaned, aes(x = CityAbr,fill = Amenity)) + geom_bar(position = "dodge")
 ```
+The provided visualization suggests that the proportion of absent amenities across cities is significantly higher than the proportion of present amenities, indicating an imbalance between the two classes of the target variable.
 
+Bar Plot representing the frequency of each unique category of Amenity
 ```{r}
 category_counts <- table(dataframe_cleaned$Amenity)
 barplot(category_counts, 
@@ -145,7 +150,10 @@ barplot(category_counts,
         ylab = "Frequency",
         col = "blue")
 ```
+Ratio = Count of "no amenity" / Count of "presence of amenity" = 12,232 / 769 ≈ 15.89
+The ratio in this context represents the class imbalance between the two categories of the target variable, where "no amenity" is significantly more common (approximately 15.89 times) than "presence of amenity." This means that the dataset is skewed towards the "no amenity" category, and it's imbalanced in favor of the majority class ("no amenity").
 
+Bar Plot representing the frequency of each unique category of New_Amenity
 ```{r}
 category_counts <- table(dataframe_cleaned$New_Amenity)
 barplot(category_counts, 
@@ -154,15 +162,25 @@ barplot(category_counts,
         ylab = "Frequency",
         col = "blue")
 ```
+Ratio = Count of "no amenity" / Count of "presence of amenity" = 8,199 / 4,802 ≈ 1.71
+The ratio in this context represents the class imbalance between the two categories of the target variable, where "no amenity" is approximately 1.71 times more common than "presence of amenity." A ratio of 1.71 suggests that there is some imbalance in the dataset, but it's not as severe as in case with the older amenity.
 
+Grouped bar chart where the x-axis represents different Response time values, and for each Response time value, there are bars representing different categories of Amenity
 ```{r}
 ggplot(dataframe_cleaned, aes(x = `Response time`,fill = Amenity)) + geom_bar(position = "dodge")
 ```
+It appears that the Amenity category "0" has a higher frequency across most of the response time intervals compared to the category "1", which has a much lower frequency.The distribution of the response times for Amenity "0" seems to be right-skewed, meaning there are a number of outliers with higher response times. Meanwhile, the distribution for Amenity "1" is less clear due to the lower counts but follows a similar pattern.
 
+Grouped bar chart where the x-axis represents different Response time values, and for each Response time value, there are bars representing different categories of New_Amenity
 ```{r}
 ggplot(dataframe_cleaned, aes(x = `Response time`,fill = New_Amenity)) + geom_bar(position = "dodge")
 ```
+Category "0" still has a higher frequency across most response time bins compared to category "1".
+Both categories show a right-skewed distribution, with the majority of the data points falling on the left side of the graph, indicating that lower response times are more frequent for both amenities.
+The distribution of the response times for the New_Amenity "0" has some prominent peaks, suggesting that there are specific response time intervals that are particularly common for this category.
+The distribution for the New_Amenity "1" appears more even across different response times but with significantly fewer counts than the category "0".
 
+Scaling or normalizing the data in order to make the data more interpretable.
 ```{r}
 dataframe_cleaned$Sevprop_mod <- dataframe_cleaned$SeverityProportion * 1000000
 dataframe_cleaned$Weights_mod <- dataframe_cleaned$Weights * 10000
@@ -171,6 +189,8 @@ print(unique_values1)
 unique_values2 <- unique(dataframe_cleaned$Weights_mod)
 print(unique_values2)
 ```
+
+Boxplot representing the distribution and summary statistics of the Severity Proportion.
 ```{r}
 ggplot(dataframe_cleaned, aes(x = Sevprop_mod)) + 
      geom_boxplot() +
@@ -178,6 +198,9 @@ ggplot(dataframe_cleaned, aes(x = Sevprop_mod)) +
        x = "SeverityProp", 
         y = "Count")+scale_x_continuous(limits = c(1, 10))
 ```
+In this boxplot, the box is very narrow, indicating that the middle 50% of the data points are very close in value.The data is heavily skewed to the left, with the majority of the data points falling in a very narrow range on the left side of the plot.The presence of multiple outliers on the right suggests that there are instances of unusually high 'SeverityProp' scores.
+
+Boxplot representing the distribution and summary statistics of Weight.
 ```{r}
 ggplot(dataframe_cleaned, aes(x = Weights_mod)) + 
      geom_boxplot() +
@@ -185,40 +208,52 @@ ggplot(dataframe_cleaned, aes(x = Weights_mod)) +
        x = "Weight", 
         y = "Count")+scale_x_continuous(limits = c(1, 10))
 ```
+The data is highly concentrated around a central value, with a significant number of outliers on the higher end. This suggests that most of the data points have lower 'Weight' values, with occasional higher values.
+
+Scatter Plot of Severity Proportion vs. Weight" For Older Amenity where there are no Amenities
 ```{r}
 df_sub <- subset(dataframe_cleaned,dataframe_cleaned$Amenity==0)
 ggplot(df_sub, aes(x = Sevprop_mod, y = Weights_mod)) +
     geom_point(color = "blue") +  # Add points
-    ggtitle("Scatter Plot of MPG vs. Weight") +
+    ggtitle("Scatter Plot of Severity Proportion vs. Weight" For Older Amenity where there are no Amenities) +
     xlab("Sev(Prop)") +
     ylab("Weights")
 ```
+There is a dense clustering of points toward the bottom left of the plot. This suggests that for lower values of "Sev(Prop)", the weighted values is low.As "Severity Proportion" increases, the data points become more spread out, and the weighted values appears to increase for some cities, with a few reaching very high weighted values.The spread of points seems to widen with increasing "Sev(Prop)", indicating more variability in weighted values at higher levels of "Severity Proportion".
 
+Scatter Plot of Severity Proportion vs. Weight For New Amenity where there are no Amenities
 ```{r}
 df_sub <- subset(dataframe_cleaned,dataframe_cleaned$New_Amenity==0)
 ggplot(df_sub, aes(x = Sevprop_mod, y = Weights_mod)) +
     geom_point(color = "blue") +  # Add points
-    ggtitle("Scatter Plot of MPG vs. Weight") +
+    ggtitle("Scatter Plot of Severity Proportion vs. Weight For New Amenity where there are no Amenities") +
     xlab("Sev(Prop)") +
     ylab("Weights")
 ```
+The data points are more concentrated toward the lower end of the Severity Proportion scale. As Severity Proportion increases, the data points become more dispersed.There does not appear to be a clear linear trend or pattern in the scatter plot. The relationship between Severity Proportion and Weights is not immediately evident from the visualization.
 
+Scatter Plot of Severity Proportion vs. Weight For Older Amenity where there are Amenities
 ```{r}
 df_subnew <- subset(dataframe_cleaned,dataframe_cleaned$Amenity==1)
 ggplot(df_subnew, aes(x = Sevprop_mod, y = Weights_mod)) +
     geom_point(color = "blue") +  # Add points
-    ggtitle("Scatter Plot of MPG vs. Weight") +
+    ggtitle("Scatter Plot of Severity Proportion vs. Weight" For Older Amenity where there are Amenities") +
     xlab("Sev(Prop)") +
     ylab("Weights")
 ```
+There is a concentration of points at the lower end of the Severity Proportion scale, suggesting that many data points have low Severity Proportion values.As Severity Proportion increases, the data points become more sparse, indicating fewer occurrences of higher Severity Proportion values.The plot shows a few points that are spread out at higher values of Severity Proportion, which could be considered as outliers.There is no clear trend or correlation visible in the scatter plot. The data points do not suggest any obvious linear, exponential, or polynomial relationship between Severity Proportion and Weights.
+
+Scatter Plot of Severity Proportion vs. Weight For New Amenity where there are Amenities
 ```{r}
 df_subnew <- subset(dataframe_cleaned,dataframe_cleaned$New_Amenity==1)
 ggplot(df_subnew, aes(x = Sevprop_mod, y = Weights_mod)) +
     geom_point(color = "blue") +  # Add points
-    ggtitle("Scatter Plot of MPG vs. Weight") +
+    ggtitle("Scatter Plot of Severity Proportion vs. Weight" For New Amenity where there are Amenities") +
     xlab("Sev(Prop)") +
     ylab("Weights")
 ```
+The majority of data points are clustered near the origin, indicating a large number of observations with low Severity Proportion and Weights values.As Severity Proportion increases, the frequency of data points decreases, and they are more spread out along the y-axis.There are a few points that appear as potential outliers with high Weights at low Severity Proportion values.There does not appear to be a clear linear relationship or correlation between Severity Proportion and Weights based on the distribution of points. The data points are mostly clustered near the bottom of the plot with a few scattered points at higher Weights values.
+
 ```{r}
 ggplot(dataframe_cleaned, aes(x = Sevprop_mod, y = Weights_mod,color = New_Amenity)) +
     geom_point() +  
@@ -226,6 +261,8 @@ ggplot(dataframe_cleaned, aes(x = Sevprop_mod, y = Weights_mod,color = New_Ameni
     xlab("Sev(Prop)") +
     ylab("Weights") 
 ```
+There is a significant clustering of blue points at the lower end of both axes, suggesting that for most observations, both Severity Proportion and Weights have low values.A few blue points are distributed sporadically at higher Weights values, indicating some variability for the "1" category of "New_Amenity"(i.e Indicating the data points with higher weights require the presence of amenities).The red points are few and are located at the lowest Severity Proportion and Weights values, suggesting that the "0" category of "New_Amenity" is associated with low Severity Proportion values.
+
 ```{r}
 ggplot(dataframe_cleaned, aes(x = Sevprop_mod, y = Weights_mod,color = Amenity)) +
     geom_point() +  
@@ -233,12 +270,7 @@ ggplot(dataframe_cleaned, aes(x = Sevprop_mod, y = Weights_mod,color = Amenity))
     xlab("Sev(Prop)") +
     ylab("Weights") 
 ```
-
-```{r}
-numeric_data <- dataframe_cleaned[, sapply(dataframe_cleaned, is.numeric)]
-cor_matrix <- cor(numeric_data)
-corrplot(cor_matrix, method = "number")
-```
+There is a notable concentration of red points along the baseline of the plot, indicating a high number of observations with the lowest Weights value across all Severity Proportion values(Indicating absence of amenities for most of the data points).Blue points occur less frequently and are mostly found at lower Severity Proportion values, except for a few instances where they appear at higher "Weights"(Indicating the data points with higher weights require the presence of amenities.)
 
 
 Modelling
@@ -479,23 +511,4 @@ print(confusion_matrix)
 ```
 In the data preprocessing stage, missing values were checked and categorical variables were converted into factors. A binary variable, HighSeverity, denoting accidents with severity greater than 2, was created. The dataset was then split into training and testing sets, and relevant features such as temperature, humidity, pressure, visibility, and wind direction were selected based on domain knowledge. A logistic regression model was trained using these features, and predictions on the test set were made, with probabilities converted to binary outcomes using a 0.5 threshold. The model's performance evaluation revealed an accuracy of 81.35%, with a 95% confidence interval between 81.32% and 81.38%. Comparison to the No Information Rate yielded a p-value of 0.5141, indicating no significant difference. The Kappa statistic was minimal at 1e-04, suggesting limited agreement beyond chance. Mcnemar's test, however, indicated a significant difference in performance between predicted and actual outcomes with a highly significant p-value of <2e-16.\
 
-
-```{r}
-model <- glm(Amenity ~ Sevprop_mod + `Response time` , data = dataframe_cleaned, family = binomial)
-summary(model)
-predicted_probabilities <- predict(model, type = "response")
-predicted_outcomes <- ifelse(predicted_probabilities > 0.5, 1, 0)
-actual_outcomes <- dataframe_cleaned$Amenity
-accuracy <- mean(predicted_outcomes == actual_outcomes)
-print(accuracy)
-```
-```{r}
-model <- glm(New_Amenity ~ Weights_mod, data = dataframe_cleaned, family = binomial)
-summary(model)
-predicted_probabilities <- predict(model, type = "response")
-predicted_outcomes <- ifelse(predicted_probabilities > 0.001, 1, 0)
-actual_outcomes <- dataframe_cleaned$Amenity
-accuracy <- mean(predicted_outcomes == actual_outcomes)
-print(accuracy)
-```
 
