@@ -215,7 +215,7 @@ Scatter Plot of Severity Proportion vs. Weight" For Older Amenity where there ar
 df_sub <- subset(dataframe_cleaned,dataframe_cleaned$Amenity==0)
 ggplot(df_sub, aes(x = Sevprop_mod, y = Weights_mod)) +
     geom_point(color = "blue") +  # Add points
-    ggtitle("Scatter Plot of Severity Proportion vs. Weight" For Older Amenity where there are no Amenities) +
+    ggtitle("Scatter Plot of Severity Proportion vs. Weight For Older Amenity where there are no Amenities") +
     xlab("Sev(Prop)") +
     ylab("Weights")
 ```
@@ -237,9 +237,8 @@ Scatter Plot of Severity Proportion vs. Weight For Older Amenity where there are
 df_subnew <- subset(dataframe_cleaned,dataframe_cleaned$Amenity==1)
 ggplot(df_subnew, aes(x = Sevprop_mod, y = Weights_mod)) +
     geom_point(color = "blue") +  # Add points
-    ggtitle("Scatter Plot of Severity Proportion vs. Weight" For Older Amenity where there are Amenities") +
-    xlab("Sev(Prop)") +
-    ylab("Weights")
+    ggtitle("Scatter Plot of Severity Proportion vs. Weight For Older Amenity where there are Amenities") +
+    xlab("Sev(Prop)") + ylab("Weights")
 ```
 There is a concentration of points at the lower end of the Severity Proportion scale, suggesting that many data points have low Severity Proportion values.As Severity Proportion increases, the data points become more sparse, indicating fewer occurrences of higher Severity Proportion values.The plot shows a few points that are spread out at higher values of Severity Proportion, which could be considered as outliers.There is no clear trend or correlation visible in the scatter plot. The data points do not suggest any obvious linear, exponential, or polynomial relationship between Severity Proportion and Weights.
 
@@ -247,8 +246,8 @@ Scatter Plot of Severity Proportion vs. Weight For New Amenity where there are A
 ```{r}
 df_subnew <- subset(dataframe_cleaned,dataframe_cleaned$New_Amenity==1)
 ggplot(df_subnew, aes(x = Sevprop_mod, y = Weights_mod)) +
-    geom_point(color = "blue") +  # Add points
-    ggtitle("Scatter Plot of Severity Proportion vs. Weight" For New Amenity where there are Amenities") +
+    geom_point(color = "blue") +
+    ggtitle("Scatter Plot of Severity Proportion vs. Weight For New Amenity where there are Amenities") +
     xlab("Sev(Prop)") +
     ylab("Weights")
 ```
@@ -418,52 +417,6 @@ print(conf_matrix)
 ```{r}
 length(predictions)
 length(test_data$New.Amenity)
-```
-
-```{r}
-# Data Exploration
-summary(accidents_data)
-
-# Data Preprocessing
-# Check for missing values
-sum(is.na(accidents_data))
-accidents_data$Weather_Condition <- as.factor(accidents_data$Weather_Condition)
-accidents_data$Wind_Direction <- as.factor(accidents_data$Wind_Direction)
-accidents_data$Sunrise_Sunset <- as.factor(accidents_data$Sunrise_Sunset)
-
-# Create a binary variable indicating high or low severity (you can define a threshold)
-accidents_data$HighSeverity <- ifelse(accidents_data$Severity > 2, 1, 0)
-```
-
-```{r}
-set.seed(123)
-split_index <- sample(nrow(accidents_data), size = 4000)
-train_data <- accidents_data[split_index, ]
-test_data <- accidents_data[-split_index, ]
-
-# Select relevant features based on your domain knowledge
-selected_features <- c('Temperature.F.', 'Humidity...', 'Pressure.in.', 'Visibility.mi.', 'Wind_Direction')
-colnames(train_data)
-train_data[,selected_features]
-
-# Train a predictive model (using logistic regression in this case)
-model <- glm(HighSeverity ~ ., data = train_data[, c('HighSeverity', selected_features)], family = "binomial")
-
-# Make predictions on the test set
-predictions <- predict(model, newdata = test_data[, selected_features], type = "response")
-
-# Convert probabilities to binary predictions
-binary_predictions <- ifelse(predictions > 0.5, 1, 0)
-
-# Convert actual outcomes to factor with the same levels as binary_predictions
-test_data$HighSeverity <- as.factor(test_data$HighSeverity)
-binary_predictions <- as.factor(binary_predictions)
-```
-
-```{r}
-# Evaluate the model
-confusion_matrix <- confusionMatrix(binary_predictions, test_data$HighSeverity)
-print(confusion_matrix)
 ```
 
 
