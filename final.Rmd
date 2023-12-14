@@ -387,6 +387,58 @@ knn_model <- train(New.Amenity ~ ., data = train_data, method = "knn")
 summary(knn_model)
 
 ```
+- True Positives (TP): 1317
+- True Negatives (TN): 2326
+- False Positives (FP): 6
+- False Negatives (FN): 1
+- Accuracy Metrics:
+- Accuracy: 99.81%
+
+The proportion of correctly classified instances (both true positives and true negatives) among all instances.
+95% Confidence Interval (CI): (99.61%, 99.92%)
+
+The range within which we can be 95% confident that the true accuracy lies.
+**No Information Rate (NIR): 63.75%**
+The accuracy that could be achieved by always predicting the majority class.
+
+**Kappa: 99.58%**
+A measure of how well the model performs compared to what would be expected by chance. It's particularly useful when dealing with imbalanced classes.
+
+## **Sensitivity and Specificity:**
+
+**Sensitivity (True Positive Rate): 99.96%**
+The proportion of actual positive instances that were correctly predicted. Also known as recall or true positive rate.
+
+**Specificity (True Negative Rate): 99.55%**
+The proportion of actual negative instances that were correctly predicted.
+
+## **Positive Predictive Value (Precision) and Negative Predictive Value:**
+
+**Pos Pred Value (Precision): 99.74%**
+The proportion of instances predicted as positive that are truly positive.
+
+**Neg Pred Value: 99.92%**
+The proportion of instances predicted as negative that are truly negative.
+
+## **Prevalence and Detection Rate:**
+
+**Prevalence: 63.75%**
+The proportion of the positive class in the dataset.
+
+**Detection Rate: 63.73%**
+The proportion of instances correctly predicted as positive.
+
+## **Balanced Accuracy:**
+
+**Balanced Accuracy: 99.75%**
+The average of sensitivity and specificity, useful when dealing with imbalanced classes.
+
+
+## **Conclusion:**
+- The model shows very high accuracy, sensitivity, specificity, and precision.
+- The Kappa statistic suggests excellent agreement beyond what would be expected by chance.
+- The model performs significantly better than predicting the majority class in terms of accuracy.
+- It's important to consider the specific context and requirements of the problem to determine if this level of performance is satisfactory.
 
 ```{r}
 
@@ -404,6 +456,7 @@ levels(train_data$New.Amenity)
 test_data$New.Amenity <- factor(test_data$New.Amenity, levels = c(0, 1))
 predictions <- predict(knn_model, newdata = test_data)
 ```
+
 ```{r}
 head(test_data)
 ```
