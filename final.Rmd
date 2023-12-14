@@ -23,7 +23,7 @@ output:
 library(ezids)
 library(ggplot2)
 library(caTools)
-library(glmnet)
+#library(glmnet)
 library(caret)
 library(pROC)
 library(PRROC)
@@ -48,9 +48,7 @@ library(corrplot)
 In response to the pressing issue of road safety in the United States, the project "Navigating Road Safety: Insights & Predictions on US Accidents (2016-2023)" has evolved its focus from predicting the severity of accidents to a novel proposal centered on forecasting potential locations for the introduction of new amenities. Acknowledging the staggering annual occurrence of over 6 million passenger car accidents, the project adopts a comprehensive approach, dissecting the intricate interplay of environmental and man-made factors contributing to these incidents. By analyzing years of data, the study aims to decode patterns and predictors that go beyond quantifying incidents, emphasizing the imperative of understanding multifaceted causes. The proposed features include city, street, severity proportion, existing amenities, response time, and a calculated weight based on severity proportion multiplied by response time added to the amenity factor. This innovative model aspires not only to identify potential locations for new amenities but also to pioneer strategies for mitigating risks and enhancing passenger safety, thereby catalyzing transformative changes in road safety measures and reducing casualties. The overarching objective is a testament to the belief that preventing accidents is a significant stride towards preserving human life and improving the quality of road travel for all.\
 
 # Data Description
-
-
-**Feature Selection**
+The original dataframe underwent feature engineering where a new column named "weight" was introduced. The "weight" column was derived by multiplying the values of the "amenity" column with the "sev_proportion" column. Following this, a threshold of 0.00001 was established. Subsequently, a new column called "new_amenity" was created to predict binary values. If the calculated value in the "weight" column surpassed the threshold of 0.00001, the corresponding entry in the "new_amenity" column was set to 1; otherwise, it was set to 0. This process essentially involves creating a binary classification for the "new_amenity" variable based on the weighted product of "amenity" and "sev_proportion," categorizing instances as either meeting or falling below the specified threshold.
 
 # SMART Questions
 
@@ -62,7 +60,7 @@ In response to the pressing issue of road safety in the United States, the proje
 
 Reading the US Accidents Related data from CSV File.
 ```{r}
-df = read.csv('C:/Users/nupur/computer/Desktop/Intro_DS/DATS6101_Project/US_Accidents.csv')
+df = read.csv('US_Accidents.csv')
 head(df, 5)
 ```
 
@@ -118,11 +116,11 @@ The table shows that Houston has the highest severity, with a value of 0.0007500
 
 Converting the category columns into factor columns
 ```{r}
+
 dataframe_cleaned <- na.omit(df)
 str(dataframe_cleaned)
-
 dataframe_cleaned$City <- as.factor(dataframe_cleaned$City)
-names(dataframe_cleaned)[names(dataframe_cleaned) == "New Amenity"] <- "New_Amenity"
+names(dataframe_cleaned)[names(dataframe_cleaned) == "New.Amenity"] <- "New_Amenity"
 dataframe_cleaned$Amenity<- as.factor(dataframe_cleaned$Amenity)
 dataframe_cleaned$New_Amenity<- as.factor(dataframe_cleaned$New_Amenity)
 #dataframe_cleaned$`Response time`<- as.factor(dataframe_cleaned$`Response time`)
@@ -167,13 +165,13 @@ The ratio in this context represents the class imbalance between the two categor
 
 Grouped bar chart where the x-axis represents different Response time values, and for each Response time value, there are bars representing different categories of Amenity
 ```{r}
-ggplot(dataframe_cleaned, aes(x = `Response time`,fill = Amenity)) + geom_bar(position = "dodge")
+ggplot(dataframe_cleaned, aes(x = `Response.time`,fill = Amenity)) + geom_bar(position = "dodge")
 ```
 It appears that the Amenity category "0" has a higher frequency across most of the response time intervals compared to the category "1", which has a much lower frequency.The distribution of the response times for Amenity "0" seems to be right-skewed, meaning there are a number of outliers with higher response times. Meanwhile, the distribution for Amenity "1" is less clear due to the lower counts but follows a similar pattern.
 
 Grouped bar chart where the x-axis represents different Response time values, and for each Response time value, there are bars representing different categories of New_Amenity
 ```{r}
-ggplot(dataframe_cleaned, aes(x = `Response time`,fill = New_Amenity)) + geom_bar(position = "dodge")
+ggplot(dataframe_cleaned, aes(x = `Response.time`,fill = New_Amenity)) + geom_bar(position = "dodge")
 ```
 Category "0" still has a higher frequency across most response time bins compared to category "1".
 Both categories show a right-skewed distribution, with the majority of the data points falling on the left side of the graph, indicating that lower response times are more frequent for both amenities.
@@ -185,9 +183,7 @@ Scaling or normalizing the data in order to make the data more interpretable.
 dataframe_cleaned$Sevprop_mod <- dataframe_cleaned$SeverityProportion * 1000000
 dataframe_cleaned$Weights_mod <- dataframe_cleaned$Weights * 10000
 unique_values1 <- unique(dataframe_cleaned$Sevprop_mod)
-print(unique_values1)
 unique_values2 <- unique(dataframe_cleaned$Weights_mod)
-print(unique_values2)
 ```
 
 Boxplot representing the distribution and summary statistics of the Severity Proportion.
@@ -272,12 +268,12 @@ ggplot(dataframe_cleaned, aes(x = Sevprop_mod, y = Weights_mod,color = Amenity))
 There is a notable concentration of red points along the baseline of the plot, indicating a high number of observations with the lowest Weights value across all Severity Proportion values(Indicating absence of amenities for most of the data points).Blue points occur less frequently and are mostly found at lower Severity Proportion values, except for a few instances where they appear at higher "Weights"(Indicating the data points with higher weights require the presence of amenities.)
 
 
-Modelling
+# Modelling
 ```{r}
 set.seed(123)
 ```
 
-## Train-Test Split Explanation
+#### Train-Test Split Explanation
 
 The provided R code performs a train-test split on a dataframe (`df`). This is a common practice in machine learning to assess the performance of a model on unseen data.
 ```{r}
@@ -294,14 +290,14 @@ model_formula <- New.Amenity ~ .
 model <- glm(model_formula, train_data, family = "binomial")
 summary(model)
 ```
-## Logit Equation:
+#### Logit Equation:
 
 \[
 \text{{logit}}(p) = -4.784 \times 10^3 - 4.46 \times 10^8 \times \text{{Severity\_Proportion}} - 5.626 \times 10^8 \times \text{{Amenity}} - 38.94 \times \text{{Response\_time}} + 5.626 \times 10^8 \times \text{{Weights}}
 \]
 
 
-## Interpretation of Logistic Regression Coefficients
+#### Interpretation of Logistic Regression Coefficients
 
 - **Intercept (-4.784e+03):** The intercept represents the log-odds of the response variable being 1 when all predictor variables are zero. A large negative value suggests a low probability of the response variable being 1 in the absence of other factors.
 
@@ -364,7 +360,7 @@ ggplot(conf_matrix_df, aes(x = Var1, y = predicted_labels, fill = Freq)) +
 
 ```
 
-## Analysis of Confusion Matrix:
+#### Analysis of Confusion Matrix:
 
 - 2323 instances were correctly predicted as class 0 (true negatives).
 - 1323 instances were correctly predicted as class 1 (true positives).
@@ -404,7 +400,7 @@ The accuracy that could be achieved by always predicting the majority class.
 **Kappa: 99.58%**
 A measure of how well the model performs compared to what would be expected by chance. It's particularly useful when dealing with imbalanced classes.
 
-## **Sensitivity and Specificity:**
+#### **Sensitivity and Specificity:**
 
 **Sensitivity (True Positive Rate): 99.96%**
 The proportion of actual positive instances that were correctly predicted. Also known as recall or true positive rate.
@@ -412,7 +408,7 @@ The proportion of actual positive instances that were correctly predicted. Also 
 **Specificity (True Negative Rate): 99.55%**
 The proportion of actual negative instances that were correctly predicted.
 
-## **Positive Predictive Value (Precision) and Negative Predictive Value:**
+#### **Positive Predictive Value (Precision) and Negative Predictive Value:**
 
 **Pos Pred Value (Precision): 99.74%**
 The proportion of instances predicted as positive that are truly positive.
@@ -420,7 +416,7 @@ The proportion of instances predicted as positive that are truly positive.
 **Neg Pred Value: 99.92%**
 The proportion of instances predicted as negative that are truly negative.
 
-## **Prevalence and Detection Rate:**
+#### **Prevalence and Detection Rate:**
 
 **Prevalence: 63.75%**
 The proportion of the positive class in the dataset.
@@ -428,13 +424,13 @@ The proportion of the positive class in the dataset.
 **Detection Rate: 63.73%**
 The proportion of instances correctly predicted as positive.
 
-## **Balanced Accuracy:**
+#### **Balanced Accuracy:**
 
 **Balanced Accuracy: 99.75%**
 The average of sensitivity and specificity, useful when dealing with imbalanced classes.
 
 
-## **Conclusion:**
+#### **Conclusion:**
 - The model shows very high accuracy, sensitivity, specificity, and precision.
 - The Kappa statistic suggests excellent agreement beyond what would be expected by chance.
 - The model performs significantly better than predicting the majority class in terms of accuracy.
@@ -473,12 +469,10 @@ length(test_data$New.Amenity)
 ```
 
 
-
+###### Predicting the Severity
 ```{r}
 accidents_data <- read.csv('/Users/apoorvareddy/Downloads/Academic/DATS6101/Project/US_accidents_EDA.csv')
 
-# Data Exploration
-summary(accidents_data)
 # Data Preprocessing
 # Check for missing values
 sum(is.na(accidents_data))
@@ -496,8 +490,7 @@ test_data <- accidents_data[-split_index, ]
 
 # Select relevant features based on your domain knowledge
 selected_features <- c('Temperature.F.', 'Humidity...', 'Pressure.in.', 'Visibility.mi.', 'Wind_Direction')
-colnames(train_data)
-train_data[,selected_features]
+
 
 # Train a predictive model (using logistic regression in this case)
 model <- glm(HighSeverity ~ ., data = train_data[, c('HighSeverity', selected_features)], family = "binomial")
@@ -517,4 +510,5 @@ print(confusion_matrix)
 ```
 In the data preprocessing stage, missing values were checked and categorical variables were converted into factors. A binary variable, HighSeverity, denoting accidents with severity greater than 2, was created. The dataset was then split into training and testing sets, and relevant features such as temperature, humidity, pressure, visibility, and wind direction were selected based on domain knowledge. A logistic regression model was trained using these features, and predictions on the test set were made, with probabilities converted to binary outcomes using a 0.5 threshold. The model's performance evaluation revealed an accuracy of 81.35%, with a 95% confidence interval between 81.32% and 81.38%. Comparison to the No Information Rate yielded a p-value of 0.5141, indicating no significant difference. The Kappa statistic was minimal at 1e-04, suggesting limited agreement beyond chance. Mcnemar's test, however, indicated a significant difference in performance between predicted and actual outcomes with a highly significant p-value of <2e-16.\
 
-
+# Conclusion
+In conclusion, the feature engineering process undertaken in the original dataframe, particularly the introduction of the "weight" column derived from the product of "amenity" and "sev_proportion," followed by the binary classification in the "new_amenity" column, establishes an effective framework for predicting potential locations for amenities. The utilization of a threshold of 0.00001 in this binary classification provides a nuanced approach, categorizing instances based on the weighted influence of "amenity" and "sev_proportion." The successful modeling for future predictions, with a focus on exploring severity as the dependent variable, suggests the potential for robust insights into amenity placement. Looking ahead, enhancing the predictive power can be achieved by incorporating additional relevant features. Overall, this approach offers a strategic methodology for decision-making in identifying and prioritizing locations for amenities in a given context.\
